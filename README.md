@@ -1,6 +1,6 @@
 # Honig ab Hof – Imkerei Josef Filz
 
-Website mit Online-Vorreservierung (nur Selbstabholung). Statische Seiten auf GitHub Pages, Daten in Supabase (Projekt „Honig Filz“, Frankfurt).
+Website mit Online-Reservierung (nur Selbstabholung). Statische Seiten auf GitHub Pages, Daten in Supabase (Projekt „Honig Filz“, Frankfurt).
 
 - Website: https://fuez0.github.io/honig/
 - Verwaltung: https://fuez0.github.io/honig/admin.html

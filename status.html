@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Meine Reservierung</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div id="site-header"></div>
@@ -14,7 +14,7 @@
 <div id="site-footer"></div>
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=4"></script>
+<script src="common.js?v=5"></script>
 <script>
 (async function () {
   var H = Honig, esc = H.esc, main = document.getElementById('main');
@@ -45,7 +45,7 @@
   var html = '';
   if (q.get('neu')) {
     html += '<div class="thanks"><div class="big">🍯</div><h1>Danke, ' + esc(r.name.split(' ')[0]) + '!</h1>' +
-      '<p>Deine Vorreservierung ist eingegangen. Wir melden uns und bestätigen den Abholtermin.</p>' +
+      '<p>Deine Reservierung ist eingegangen. Wir melden uns und bestätigen den Abholtermin.</p>' +
       '<p class="small muted">Tipp: Speichere diese Seite als Lesezeichen – hier siehst du jederzeit den aktuellen Status.</p></div>';
   }
   html += '<div class="panel"><div class="res-head"><div><span class="muted small">Reservierungsnummer</span><div class="code">' + esc(r.code) + '</div></div>' +

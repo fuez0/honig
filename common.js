@@ -78,7 +78,7 @@
     return banner + '<header class="topbar"><div class="wrap topbar-in">' +
       '<a class="brand" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>' + esc(st.hof_name) + '</span></a>' +
       '<nav class="nav"><a href="./#produkte">Produkte</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a>' +
-      '<a href="status.html">Meine Reservierung</a><a class="btn btn-small" href="./#reservieren">Vorreservieren</a></nav></div></header>';
+      '<a href="status.html">Meine Reservierung</a><a class="btn btn-small" href="./#produkte">Reservieren</a></nav></div></header>';
   }
   function footer(st) {
     var wa = st.whatsapp ? '<a href="https://wa.me/' + esc(phoneIntl(st.whatsapp).replace('+', '')) + '" target="_blank" rel="noopener">WhatsApp schreiben</a>' : '';
@@ -94,12 +94,25 @@
     document.title = (title ? title + ' · ' : '') + (st.hof_name || 'Honig ab Hof') + (title ? '' : ' – Honig ab Hof');
     var h = document.getElementById('site-header'); if (h) h.innerHTML = header(st);
     var f = document.getElementById('site-footer'); if (f) f.innerHTML = footer(st);
+    setHeaderVar();
+  }
+  // Höhe der fixen Kopfzeile merken, damit Sprungmarken nicht darunter verschwinden
+  function setHeaderVar() {
+    var t = document.querySelector('.topbar');
+    if (t) document.documentElement.style.setProperty('--hdr', Math.round(t.getBoundingClientRect().height) + 'px');
+  }
+  window.addEventListener('resize', setHeaderVar);
+  // Nach dem Laden der Inhalte zur Sprungmarke springen (z. B. von einer Unterseite kommend)
+  function scrollToHash() {
+    if (!location.hash || location.hash.length < 2) return;
+    var el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (el) el.scrollIntoView({ block: 'start' });
   }
 
   window.Honig = {
     sb: sb, esc: esc, nl: nl, euro: euro, parseEuro: parseEuro, dateDe: dateDe, dtDe: dtDe, todayVienna: todayVienna,
     isoWeekday: isoWeekday, phoneIntl: phoneIntl, pickupDays: pickupDays, slots: slots, mapsUrl: mapsUrl,
-    statusUrl: statusUrl, imgSrc: imgSrc, loadSettings: loadSettings, applyChrome: applyChrome,
+    statusUrl: statusUrl, scrollToHash: scrollToHash, imgSrc: imgSrc, loadSettings: loadSettings, applyChrome: applyChrome,
     WEEKDAYS: WEEKDAYS, STATUS: STATUS, STATUS_SHORT: STATUS_SHORT
   };
 })();

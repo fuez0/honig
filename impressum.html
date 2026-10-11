@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Impressum</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div id="site-header"></div>
@@ -13,7 +13,7 @@
 <div id="site-footer"></div>
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=4"></script>
+<script src="common.js?v=5"></script>
 <script>
 (async function () {
   var H = Honig, e = H.esc, st = await H.loadSettings();
@@ -23,7 +23,7 @@
     '<p><strong>' + e(st.hof_name) + '</strong><br>Inhaber: ' + e(st.inhaber) + '<br>' + e(st.strasse) + '<br>' + e(st.plz_ort) + '<br>Österreich</p>' +
     '<p>' + (st.telefon ? 'Telefon: ' + e(st.telefon) + '<br>' : '') + (st.email ? 'E-Mail: ' + e(st.email) : '') + '</p>' +
     ((st.impressum_extra || '').trim() ? '<p>' + H.nl(st.impressum_extra) + '</p>' : '') +
-    '<p>Blattlinie: Information über die Produkte der Imkerei und Möglichkeit zur Vorreservierung für die Selbstabholung.</p>' +
+    '<p>Blattlinie: Information über die Produkte der Imkerei und Möglichkeit zur Reservierung für die Selbstabholung.</p>' +
     '<p class="small muted">Bildnachweis: Beispielfotos von <a href="https://unsplash.com" target="_blank" rel="noopener">Unsplash</a> (Unsplash-Lizenz), sofern nicht durch eigene Fotos ersetzt.</p>';
 })();
 </script>

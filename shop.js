@@ -28,6 +28,7 @@
   if (st.telefon) document.getElementById('phoneq').innerHTML = 'Fragen? Ruf an: <a href="tel:' + esc(H.phoneIntl(st.telefon)) + '">' + esc(st.telefon) + '</a>';
 
   var open = st.reservierung_offen === '1';
+  var jumpAfterRender = function () { H.scrollToHash(); window.addEventListener('load', H.scrollToHash, { once: true }); };
 
   // ---------- Produkte ----------
   var grid = document.getElementById('grid');
@@ -52,7 +53,8 @@
   }).join('');
 
   if (!open) {
-    document.getElementById('resbox').innerHTML = '<div class="panel"><h2>Vorreservierung derzeit pausiert</h2><p>Gerade nehmen wir keine Online-Reservierungen an.' +
+    jumpAfterRender();
+    document.getElementById('resbox').innerHTML = '<div class="panel"><h2>Reservierung derzeit pausiert</h2><p>Gerade nehmen wir keine Online-Reservierungen an.' +
       (st.telefon ? ' Ruf uns gerne an: <a href="tel:' + esc(H.phoneIntl(st.telefon)) + '">' + esc(st.telefon) + '</a>' : '') + '</p></div>';
     return;
   }
@@ -96,6 +98,7 @@
     inp.addEventListener('input', update);
   });
   update();
+  jumpAfterRender();
 
   function showErrors(list) {
     var box = document.getElementById('fehler');
