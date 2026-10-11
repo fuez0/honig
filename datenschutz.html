@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datenschutz</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<div id="site-header"></div>
+<section class="section"><div class="wrap narrow prose">
+<h1>Datenschutzerklärung</h1>
+<h2>Verantwortlicher</h2>
+<p id="verantw">–</p>
+<h2>Vorreservierung</h2>
+<p>Wenn du über diese Website Honig vorreservierst, speichern wir Name, Telefonnummer und/oder E-Mail-Adresse, Wunschtermin, Anmerkung und die reservierten Produkte. Diese Daten verwenden wir ausschließlich, um die Reservierung abzuwickeln und dich wegen des Abholtermins zu kontaktieren (Art. 6 Abs. 1 lit. b DSGVO). Eine Weitergabe an Dritte zu Werbezwecken erfolgt nicht. Wenn wir dich per WhatsApp kontaktieren, gelten zusätzlich die Datenschutzbestimmungen von WhatsApp.</p>
+<p>Reservierungsdaten werden gelöscht, sobald sie nicht mehr benötigt werden, spätestens nach Ablauf gesetzlicher Aufbewahrungspflichten.</p>
+<h2>Hosting &amp; Datenbank</h2>
+<p>Die Website wird über GitHub Pages (GitHub Inc., USA) ausgeliefert. Reservierungsdaten werden in einer Datenbank von Supabase (Supabase Inc.) mit Serverstandort Frankfurt (EU) gespeichert. Beim Aufruf werden technisch notwendige Daten (z. B. IP-Adresse, Zeitpunkt) verarbeitet. Zum Schutz vor Missbrauch wird die IP-Adresse in verschlüsselter (gehashter) Form bis zu 24 Stunden gespeichert.</p>
+<h2>Cookies &amp; lokaler Speicher</h2>
+<p>Es gibt kein Tracking und keine Werbe-Cookies. Nur im Verwaltungsbereich wird die Anmeldung im lokalen Speicher des Browsers gemerkt.</p>
+<h2>Externe Bilder</h2>
+<p>Einige Fotos werden vom Bilddienst Unsplash (Unsplash Inc., Kanada/USA) geladen. Dabei wird deine IP-Adresse an Unsplash übermittelt.</p>
+<h2>Deine Rechte</h2>
+<p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Wende dich dazu an uns. Beschwerden kannst du bei der Österreichischen Datenschutzbehörde (dsb.gv.at) einbringen.</p>
+</div></section>
+<div id="site-footer"></div>
+<script src="supabase.js"></script>
+<script src="config.js"></script>
+<script src="common.js?v=4"></script>
+<script>
+(async function () {
+  var H = Honig, e = H.esc, st = await H.loadSettings();
+  H.applyChrome(st, 'Datenschutz');
+  document.getElementById('verantw').innerHTML = e(st.inhaber) + ', ' + e(st.hof_name) + ', ' + e(st.strasse) + ', ' + e(st.plz_ort) +
+    (st.email ? ', ' + e(st.email) : '') + (st.telefon ? ', Tel. ' + e(st.telefon) : '');
+})();
+</script>
+</body>
+</html>

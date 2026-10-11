@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imkerei Josef Filz – Honig ab Hof</title>
+<meta name="description" content="Echter Honig aus der Region – direkt ab Hof. Jetzt online vorreservieren und bequem ab Hof abholen.">
+<meta property="og:title" content="Imkerei Josef Filz – Honig ab Hof">
+<meta property="og:description" content="Echter Honig aus der Region – jetzt online vorreservieren und ab Hof abholen.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?w=1200&q=70&auto=format&fit=crop">
+<meta name="theme-color" content="#b8730a">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<div id="site-header"><header class="topbar"><div class="wrap topbar-in"><a class="brand" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>Imkerei Josef Filz</span></a></div></header></div>
+
+<section class="hero" id="hero" style="--hero:url('https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?w=1800&q=70&auto=format&fit=crop')">
+  <div class="wrap hero-in">
+    <p class="eyebrow">Imkerhonig · ab Hof</p>
+    <h1 data-s="hof_name">Imkerei Josef Filz</h1>
+    <p class="lead" data-s="claim">Echter Honig aus der Region – direkt ab Hof</p>
+    <div class="hero-cta">
+      <a class="btn" href="#produkte">Honig auswählen</a>
+      <a class="btn btn-ghost" href="#abholung">Abholung &amp; Anfahrt</a>
+    </div>
+    <ul class="usp">
+      <li>🐝 Aus eigener Imkerei</li>
+      <li>🫙 Schonend geschleudert</li>
+      <li>🏡 Nur Selbstabholung – kein Versand</li>
+    </ul>
+  </div>
+</section>
+
+<section class="steps wrap">
+  <div class="step"><span>1</span><h3>Auswählen</h3><p>Honigsorten und Menge aussuchen.</p></div>
+  <div class="step"><span>2</span><h3>Vorreservieren</h3><p>Wunschtermin angeben – kostenlos und unverbindlich bis zur Bestätigung.</p></div>
+  <div class="step"><span>3</span><h3>Bestätigung</h3><p>Wir bestätigen deinen Abholtermin per Telefon, SMS, WhatsApp oder E-Mail.</p></div>
+  <div class="step"><span>4</span><h3>Abholen</h3><p>Honig ab Hof abholen und vor Ort bezahlen.</p></div>
+</section>
+
+<form id="resform" novalidate>
+<section id="produkte" class="section">
+  <div class="wrap">
+    <h2>Unser Honig</h2>
+    <p class="muted"><span>Preise pro Stück.</span> <span data-s="zahlung">Bezahlung bar bei der Abholung.</span></p>
+    <div id="fehler"></div>
+    <div class="grid" id="grid"><p class="muted">Honig wird geladen …</p></div>
+  </div>
+</section>
+
+<section id="reservieren" class="section section-alt">
+  <div class="wrap res-grid" id="resbox">
+    <div class="panel">
+      <h2>Vorreservieren</h2>
+      <p class="muted">Wir legen deinen Honig zur Seite und bestätigen dir den Abholtermin.</p>
+      <div class="fields">
+        <label>Name *<input type="text" name="name" required maxlength="120" autocomplete="name"></label>
+        <label>Telefon / Handy<input type="tel" name="phone" maxlength="25" autocomplete="tel" placeholder="z. B. 0664 1234567"></label>
+        <label>E-Mail<input type="email" name="email" maxlength="120" autocomplete="email"></label>
+        <p class="hint">Telefon <em>oder</em> E-Mail angeben, damit wir den Termin bestätigen können.</p>
+        <label>Wunschtermin *<input type="date" name="wish_date" required></label>
+        <p class="hint" id="dayhint"></p>
+        <label id="timewrap">Uhrzeit<select name="wish_time"><option value="">egal</option></select></label>
+        <label>Anmerkung<textarea name="note" rows="3" maxlength="1000" placeholder="z. B. bringe leere Gläser mit"></textarea></label>
+        <div class="hp" aria-hidden="true"><label>Firma<input type="text" name="firma" tabindex="-1" autocomplete="off"></label></div>
+        <label class="check"><input type="checkbox" name="dsgvo" value="1" required> <span>Ich bin einverstanden, dass meine Angaben zur Abwicklung der Reservierung gespeichert werden (<a href="datenschutz.html" target="_blank">Datenschutz</a>). *</span></label>
+      </div>
+    </div>
+    <aside class="panel summary">
+      <h3>Deine Auswahl</h3>
+      <ul id="sumlist"><li class="muted">Noch nichts ausgewählt – oben Menge wählen.</li></ul>
+      <div class="sumtotal"><span>Summe</span><strong id="sumtotal">€ 0,00</strong></div>
+      <p class="small muted">Bezahlt wird erst bei der Abholung. Nur Selbstabholung – kein Versand.</p>
+      <button type="submit" class="btn btn-block" id="submitbtn">Jetzt unverbindlich reservieren</button>
+    </aside>
+  </div>
+</section>
+</form>
+
+<section id="abholung" class="section">
+  <div class="wrap two">
+    <div>
+      <h2>Abholung ab Hof</h2>
+      <p><strong>Abholzeiten</strong><br><span data-s="abholzeiten" data-nl="1"></span></p>
+      <p><strong>Adresse</strong><br><span data-s="hof_name"></span><br><span data-s="strasse"></span><br><span data-s="plz_ort"></span></p>
+      <p><a class="btn btn-ghost-dark" id="mapsbtn" href="#" target="_blank" rel="noopener">In Google Maps öffnen ↗</a></p>
+    </div>
+    <div class="infobox">
+      <h3>Gut zu wissen</h3>
+      <ul class="ticks" id="ticks"></ul>
+      <p id="phoneq"></p>
+    </div>
+  </div>
+</section>
+
+<section id="ueber-uns" class="section section-alt">
+  <div class="wrap two about">
+    <img id="aboutimg" src="https://images.unsplash.com/photo-1586779161268-51d3e65d20fb?w=1200&q=70&auto=format&fit=crop" alt="Imker bei der Arbeit an den Bienenstöcken" loading="lazy">
+    <div>
+      <h2>Über uns</h2>
+      <p data-s="ueber_uns" data-nl="1"></p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap faq">
+    <h2>Häufige Fragen</h2>
+    <details><summary>Ist die Reservierung verbindlich?</summary><p>Erst wenn wir den Termin bestätigt haben, liegt dein Honig für dich bereit. Falls du doch nicht kommen kannst, storniere bitte kurz über „Meine Reservierung“ oder ruf uns an.</p></details>
+    <details><summary>Kann ich auch ohne Reservierung vorbeikommen?</summary><p>Gerne während der Abholzeiten – solange der Vorrat reicht. Mit Reservierung ist dein Honig aber sicher.</p></details>
+    <details><summary>Warum wird Honig fest?</summary><p>Das Kristallisieren ist ein natürlicher Vorgang und ein Qualitätsmerkmal. Im warmen Wasserbad (max. 40 °C) wird er wieder flüssig.</p></details>
+    <details><summary>Wie lange ist Honig haltbar?</summary><p>Kühl, trocken und dunkel gelagert hält Honig viele Jahre. Das Mindesthaltbarkeitsdatum steht auf dem Glas.</p></details>
+  </div>
+</section>
+<div id="site-footer"></div>
+
+<script src="supabase.js"></script>
+<script src="config.js"></script>
+<script src="common.js?v=4"></script>
+<script src="shop.js?v=4"></script>
+</body>
+</html>

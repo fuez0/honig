@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Honig-Verwaltung</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="admin-manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Honig">
+<meta name="theme-color" content="#7a4a06">
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body class="admin">
+<header class="abar" id="abar" hidden><div class="wrap abar-in">
+  <a class="brand" href="#/"><img src="favicon.svg" width="28" height="28" alt=""> Honig-Verwaltung</a>
+  <nav>
+    <a href="#/" data-nav="res">Reservierungen <span class="dot" id="newdot" hidden></span></a>
+    <a href="#/abholliste" data-nav="liste">Abholliste</a>
+    <a href="#/produkte" data-nav="prod">Produkte</a>
+    <a href="#/einstellungen" data-nav="set">Einstellungen</a>
+    <a href="#/benutzer" data-nav="user">Benutzer</a>
+    <a href="" target="_blank">Website ↗</a>
+    <a href="#/abmelden" id="logout">Abmelden</a>
+  </nav>
+</div></header>
+<main class="amain"><div class="wrap"><div id="flash"></div><div id="app"><p class="muted">Wird geladen …</p></div></div></main>
+<script src="supabase.js"></script>
+<script src="config.js"></script>
+<script src="common.js?v=4"></script>
+<script src="admin.js?v=4"></script>
+</body>
+</html>
