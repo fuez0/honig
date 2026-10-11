@@ -98,7 +98,7 @@
   }
   // Höhe der fixen Kopfzeile merken, damit Sprungmarken nicht darunter verschwinden
   function setHeaderVar() {
-    var t = document.querySelector('.topbar');
+    var t = document.getElementById('site-header') || document.querySelector('.topbar');
     if (t) document.documentElement.style.setProperty('--hdr', Math.round(t.getBoundingClientRect().height) + 'px');
   }
   window.addEventListener('resize', setHeaderVar);
