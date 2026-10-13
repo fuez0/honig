@@ -81,6 +81,7 @@
     ST = await H.loadSettings();
     refreshBadge();
     render();
+    if (window.HonigPush) HonigPush.init(function (rerender) { refreshBadge(); if (rerender || route() === '/' || route().indexOf('/?') === 0) render(); });
   }
 
   // ---------- Router ----------
@@ -152,6 +153,7 @@
       }).join('') + '</table>';
     html += '<p class="small muted">Tipp: Diese Seite am Handy über „Teilen → Zum Home-Bildschirm“ hinzufügen – dann funktioniert sie wie eine App.</p>';
     app.innerHTML = html;
+    if (window.HonigPush) HonigPush.banner(app);
     document.getElementById('sf').onsubmit = function (e) { e.preventDefault(); go('#/?f=' + f + '&q=' + encodeURIComponent(this.q.value)); };
     app.querySelectorAll('tr.click').forEach(function (tr) { tr.onclick = function () { go('#/r/' + tr.dataset.id); }; });
     refreshBadge();
@@ -487,7 +489,9 @@
       '<li>Er öffnet <strong>' + esc(location.href.replace(/#.*$/, '')) + '</strong></li><li>„Noch kein Konto? Registrieren“ → Name, E-Mail, Passwort</li>' +
       '<li>Bestätigungslink in seiner E-Mail anklicken</li><li>Du klickst hier bei ihm auf <strong>Freigeben</strong></li></ol></div>' +
       '<form class="panel fields" id="pwf"><h3>Eigenes Passwort ändern</h3><label>Neues Passwort (mind. 8 Zeichen)<input type="password" name="pw" minlength="8" required autocomplete="new-password"></label>' +
-      '<label>Wiederholen<input type="password" name="pw2" minlength="8" required autocomplete="new-password"></label><button class="btn">Ändern</button></form></div>';
+      '<label>Wiederholen<input type="password" name="pw2" minlength="8" required autocomplete="new-password"></label><button class="btn">Ändern</button></form>' +
+      '<div class="panel" id="pushbox"></div></div>';
+    if (window.HonigPush) HonigPush.box(document.getElementById('pushbox'));
     app.querySelectorAll('[data-ap]').forEach(function (b) {
       b.onclick = async function () {
         var x = await sb.from('admins').update({ approved: b.dataset.v === '1' }).eq('user_id', b.dataset.ap);
