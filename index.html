@@ -9,10 +9,10 @@
 <meta property="og:description" content="Echter Honig aus der Region – jetzt online reservieren und ab Hof abholen.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?w=1200&q=70&auto=format&fit=crop">
-<meta name="theme-color" content="#b8730a">
+<meta name="theme-color" content="#9a5c05">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <div id="site-header"><header class="topbar"><div class="wrap topbar-in"><a class="brand" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>Imkerei Josef Filz</span></a></div></header></div>
@@ -57,13 +57,13 @@
       <h2>Reservieren</h2>
       <p class="muted">Wir legen deinen Honig zur Seite und bestätigen dir den Abholtermin.</p>
       <div class="fields">
-        <label>Name *<input type="text" name="name" required maxlength="120" autocomplete="name"></label>
+        <label>Name *<input type="text" name="name" required minlength="2" maxlength="120" autocomplete="name"></label>
         <label>Telefon / Handy<input type="tel" name="phone" maxlength="25" autocomplete="tel" placeholder="z. B. 0664 1234567"></label>
         <label>E-Mail<input type="email" name="email" maxlength="120" autocomplete="email"></label>
         <p class="hint">Telefon <em>oder</em> E-Mail angeben, damit wir den Termin bestätigen können.</p>
         <label>Wunschtermin *<input type="date" name="wish_date" required></label>
         <p class="hint" id="dayhint"></p>
-        <label id="timewrap">Uhrzeit<select name="wish_time"><option value="">egal</option></select></label>
+        <label id="timewrap">Uhrzeit<select name="wish_time"><option value="">Bitte zuerst Wunschtermin wählen</option></select></label>
         <label>Anmerkung<textarea name="note" rows="3" maxlength="1000" placeholder="z. B. bringe leere Gläser mit"></textarea></label>
         <div class="hp" aria-hidden="true"><label>Firma<input type="text" name="firma" tabindex="-1" autocomplete="off"></label></div>
         <label class="check"><input type="checkbox" name="dsgvo" value="1" required> <span>Ich bin einverstanden, dass meine Angaben zur Abwicklung der Reservierung gespeichert werden (<a href="datenschutz.html" target="_blank">Datenschutz</a>). *</span></label>
@@ -119,7 +119,7 @@
 
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=6"></script>
-<script src="shop.js?v=6"></script>
+<script src="common.js?v=7"></script>
+<script src="shop.js?v=7"></script>
 </body>
 </html>

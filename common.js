@@ -51,8 +51,18 @@
   function pickupDays(st) {
     return String(st.abholtage || '').split(',').map(function (x) { return parseInt(x, 10); }).filter(function (x) { return x >= 1 && x <= 7; });
   }
-  function slots(st) {
-    return String(st.zeitfenster || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+  // Zeitfenster: "Fr 15:00 – 18:00, Sa 09:00 – 12:00" (mit Wochentag) oder "09:00 – 12:00" (für alle Tage)
+  var DAYKEYS = { mo: 1, di: 2, mi: 3, do: 4, fr: 5, sa: 6, so: 7 };
+  function parseSlots(st) {
+    return String(st.zeitfenster || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean).map(function (x) {
+      var m = x.match(/^(mo|di|mi|do|fr|sa|so)[a-zäöü]*\.?\s*:?\s+(.+)$/i);
+      return m ? { day: DAYKEYS[m[1].toLowerCase()], label: m[2].trim() } : { day: 0, label: x };
+    });
+  }
+  function slots(st, ymd) {
+    var wd = ymd ? isoWeekday(ymd) : 0;
+    return parseSlots(st).filter(function (s) { return !ymd || !s.day || s.day === wd; }).map(function (s) { return s.label; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; });
   }
   function mapsUrl(st) {
     return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((st.strasse || '') + ', ' + (st.plz_ort || ''));
@@ -77,8 +87,11 @@
     var banner = (st.banner || '').trim() ? '<div class="banner">' + esc(st.banner) + '</div>' : '';
     return banner + '<header class="topbar"><div class="wrap topbar-in">' +
       '<a class="brand" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>' + esc(st.hof_name) + '</span></a>' +
-      '<nav class="nav"><a href="./#produkte">Produkte</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a>' +
-      '<a href="status.html">Meine Reservierung</a><a class="btn btn-small" href="./#produkte">Reservieren</a></nav></div></header>';
+      '<div class="nav-wrap"><nav class="nav" id="mainnav" aria-label="Hauptmenü"><a href="./#produkte">Produkte</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a>' +
+      '<a href="status.html">Meine Reservierung</a></nav>' +
+      '<a class="btn btn-small nav-cta" href="./#produkte">Reservieren</a>' +
+      '<button type="button" class="menu-btn" aria-expanded="false" aria-controls="mainnav" aria-label="Menü öffnen"><span></span><span></span><span></span></button></div>' +
+      '</div></header>';
   }
   function footer(st) {
     var wa = st.whatsapp ? '<a href="https://wa.me/' + esc(phoneIntl(st.whatsapp).replace('+', '')) + '" target="_blank" rel="noopener">WhatsApp schreiben</a>' : '';
@@ -92,7 +105,19 @@
   }
   function applyChrome(st, title) {
     document.title = (title ? title + ' · ' : '') + (st.hof_name || 'Honig ab Hof') + (title ? '' : ' – Honig ab Hof');
-    var h = document.getElementById('site-header'); if (h) h.innerHTML = header(st);
+    var h = document.getElementById('site-header');
+    if (h) {
+      h.innerHTML = header(st);
+      var mb = h.querySelector('.menu-btn'), nv = h.querySelector('.nav');
+      var setOpen = function (o) {
+        nv.classList.toggle('open', o); mb.setAttribute('aria-expanded', o ? 'true' : 'false');
+        mb.setAttribute('aria-label', o ? 'Menü schließen' : 'Menü öffnen');
+      };
+      mb.addEventListener('click', function () { setOpen(!nv.classList.contains('open')); });
+      nv.addEventListener('click', function (e) { if (e.target.tagName === 'A') setOpen(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && nv.classList.contains('open')) { setOpen(false); mb.focus(); } });
+      document.addEventListener('click', function (e) { if (!h.contains(e.target)) setOpen(false); });
+    }
     var f = document.getElementById('site-footer'); if (f) f.innerHTML = footer(st);
     setHeaderVar();
   }
@@ -111,7 +136,7 @@
 
   window.Honig = {
     sb: sb, esc: esc, nl: nl, euro: euro, parseEuro: parseEuro, dateDe: dateDe, dtDe: dtDe, todayVienna: todayVienna,
-    isoWeekday: isoWeekday, phoneIntl: phoneIntl, pickupDays: pickupDays, slots: slots, mapsUrl: mapsUrl,
+    isoWeekday: isoWeekday, phoneIntl: phoneIntl, pickupDays: pickupDays, slots: slots, parseSlots: parseSlots, mapsUrl: mapsUrl,
     statusUrl: statusUrl, scrollToHash: scrollToHash, imgSrc: imgSrc, loadSettings: loadSettings, applyChrome: applyChrome,
     WEEKDAYS: WEEKDAYS, STATUS: STATUS, STATUS_SHORT: STATUS_SHORT
   };

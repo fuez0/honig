@@ -36,14 +36,15 @@
   else grid.innerHTML = prods.map(function (p) {
     var stock = p.stock == null ? null : p.stock;
     var sold = stock !== null && stock <= 0;
+    var full = p.name + (p.unit ? ' ' + p.unit : '');
     var max = 99;
     if (stock !== null) max = Math.min(max, Math.max(0, stock));
     if (p.max_per_order) max = Math.min(max, p.max_per_order);
     var ctrl = sold ? '<span class="badge badge-out">Ausverkauft</span>' : (open ?
       '<div class="qty" data-id="' + p.id + '" data-price="' + p.price_cents + '" data-name="' + esc(p.name + (p.unit ? ' (' + p.unit + ')' : '')) + '">' +
-      '<button type="button" class="qminus" aria-label="weniger">−</button>' +
-      '<input type="number" value="0" min="0" max="' + max + '" inputmode="numeric" aria-label="Menge ' + esc(p.name) + '">' +
-      '<button type="button" class="qplus" aria-label="mehr">+</button></div>' : '');
+      '<button type="button" class="qminus" aria-label="' + esc(full) + ' – Menge verringern">−</button>' +
+      '<input type="number" value="0" min="0" max="' + max + '" inputmode="numeric" aria-label="Menge ' + esc(full) + '">' +
+      '<button type="button" class="qplus" aria-label="' + esc(full) + ' – Menge erhöhen">+</button></div>' : '');
     return '<article class="card' + (sold ? ' soldout' : '') + '">' +
       '<div class="card-img"><img src="' + esc(H.imgSrc(p.image_url)) + '" alt="' + esc(p.name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'glas.svg\'"></div>' +
       '<div class="card-body"><h3>' + esc(p.name) + '</h3><p class="unit">' + esc(p.unit) + '</p><p class="desc">' + H.nl(p.description) + '</p>' +
@@ -65,13 +66,37 @@
   d.min = H.todayVienna(parseInt(st.vorlauf_tage || '1', 10));
   d.max = H.todayVienna(parseInt(st.max_tage_voraus || '60', 10));
   document.getElementById('dayhint').textContent = days.length ? 'Abholung möglich: ' + days.map(function (x) { return H.WEEKDAYS[x]; }).join(', ') : '';
+  var VB = 'nach Vereinbarung';
+  var hasSlots = H.slots(st).length > 0;
+  var timeHint = document.createElement('p'); timeHint.className = 'hint'; timeHint.id = 'timehint';
+  document.getElementById('timewrap').insertAdjacentElement('afterend', timeHint);
+  function fillTimes() {
+    var sel = form.wish_time, prev = sel.value;
+    if (!d.value) {
+      sel.innerHTML = '<option value="">Bitte zuerst Wunschtermin wählen</option>'; sel.disabled = true;
+      timeHint.textContent = ''; return;
+    }
+    sel.disabled = false;
+    var sl = H.slots(st, d.value), wd = H.WEEKDAYS[H.isoWeekday(d.value)];
+    if (sl.length) {
+      sel.innerHTML = sl.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') +
+        '<option value="' + VB + '">Andere Uhrzeit – ' + VB + '</option>';
+      timeHint.textContent = 'Reguläre Abholzeit am ' + wd + ': ' + sl.join(' und ') + '.';
+    } else {
+      sel.innerHTML = '<option value="' + VB + '">' + VB.charAt(0).toUpperCase() + VB.slice(1) + '</option>';
+      timeHint.textContent = 'Am ' + wd + ' gibt es keine reguläre Abholzeit – wir vereinbaren die Uhrzeit mit dir.';
+    }
+    if (Array.prototype.some.call(sel.options, function (o) { return o.value === prev; })) sel.value = prev;
+  }
   d.addEventListener('change', function () {
+    clearErr(d);
+    fillTimes();
     if (!d.value) return d.setCustomValidity('');
-    d.setCustomValidity(days.length && days.indexOf(H.isoWeekday(d.value)) === -1 ? 'Abholung nur am ' + days.map(function (x) { return H.WEEKDAYS[x]; }).join(', ') + ' möglich.' : '');
-    d.reportValidity();
+    var bad = days.length && days.indexOf(H.isoWeekday(d.value)) === -1;
+    d.setCustomValidity(bad ? 'Abholung nur am ' + days.map(function (x) { return H.WEEKDAYS[x]; }).join(', ') + ' möglich.' : '');
+    if (bad) fieldErr(d, d.validationMessage);
   });
-  var sl = H.slots(st);
-  if (sl.length) form.wish_time.innerHTML = '<option value="">egal</option>' + sl.map(function (s) { return '<option>' + esc(s) + '</option>'; }).join('');
+  if (hasSlots) fillTimes();
   else document.getElementById('timewrap').style.display = 'none';
 
   // ---------- Warenkorb ----------
@@ -90,6 +115,7 @@
     });
     document.getElementById('sumlist').innerHTML = html || '<li class="muted">Noch nichts ausgewählt – oben Menge wählen.</li>';
     document.getElementById('sumtotal').textContent = H.euro(total);
+    if (total > 0 && grid.classList.contains('invalid')) clearErr(grid);
   }
   qtys.forEach(function (q) {
     var inp = q.querySelector('input');
@@ -100,19 +126,94 @@
   update();
   jumpAfterRender();
 
-  function showErrors(list) {
-    var box = document.getElementById('fehler');
-    box.innerHTML = '<div class="flash flash-err"><strong>Bitte prüfen:</strong><ul>' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
-    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // ---------- Fehler direkt am Feld ----------
+  function errId(el) { return 'err-' + (el.name || el.id); }
+  function anchorOf(el) {
+    if (el === grid) return grid;
+    if (el.type === 'checkbox') return el.closest('label');
+    if (el.name === 'phone' || el.name === 'email') return form.querySelector('.hint');
+    return el.closest('label') || el;
   }
+  function clearErr(el) {
+    var old = document.getElementById(errId(el)); if (old) old.remove();
+    el.removeAttribute('aria-invalid');
+    if (el === grid) grid.classList.remove('invalid');
+    if (el.type === 'checkbox') el.closest('label').classList.remove('invalid');
+    if (el.name === 'phone' || el.name === 'email') { form.phone.removeAttribute('aria-invalid'); form.email.removeAttribute('aria-invalid'); }
+  }
+  function fieldErr(el, msg) {
+    clearErr(el);
+    var p = document.createElement('p');
+    p.className = 'ferr'; p.id = errId(el); p.setAttribute('role', 'alert'); p.textContent = msg;
+    if (el === grid) { grid.classList.add('invalid'); grid.insertAdjacentElement('beforebegin', p); }
+    else {
+      anchorOf(el).insertAdjacentElement('afterend', p);
+      el.setAttribute('aria-invalid', 'true');
+      el.setAttribute('aria-describedby', p.id);
+      if (el.type === 'checkbox') el.closest('label').classList.add('invalid');
+      if (el === form.phone && /oder E-Mail/.test(msg)) form.email.setAttribute('aria-invalid', 'true');
+    }
+  }
+  function clearAll() {
+    [grid, form.name, form.phone, form.email, form.wish_date, form.dsgvo].forEach(clearErr);
+    document.getElementById('fehler').innerHTML = '';
+    var g = document.getElementById('err-general'); if (g) g.remove();
+  }
+  function focusFirst(el) {
+    var target = el === grid ? (grid.querySelector('.qty input') || grid) : el;
+    (el === grid ? grid : anchorOf(el)).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { try { target.focus({ preventScroll: true }); } catch (e) {} }, 350);
+  }
+  function generalErr(list) {
+    var g = document.getElementById('err-general'); if (g) g.remove();
+    g = document.createElement('div'); g.id = 'err-general'; g.className = 'flash flash-err'; g.setAttribute('role', 'alert');
+    g.innerHTML = '<strong>Bitte prüfen:</strong><ul>' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    var btn = document.getElementById('submitbtn'); btn.insertAdjacentElement('beforebegin', g);
+    g.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  // Server-Meldungen dem passenden Feld zuordnen
+  function showErrors(list) {
+    var first = null, rest = [];
+    list.forEach(function (m) {
+      var el = /Produkt|verfügbar|ausverkauft|maximal|Stück/i.test(m) ? grid
+        : /Telefon|E-Mail|erreichen/i.test(m) ? (/E-Mail-Adresse scheint/.test(m) ? form.email : form.phone)
+        : /Namen/i.test(m) ? form.name
+        : /Wunschtermin|Datum|Tag ist/i.test(m) ? form.wish_date : null;
+      if (el) { fieldErr(el, m); if (!first) first = el; } else rest.push(m);
+    });
+    if (rest.length) generalErr(rest);
+    else if (first) focusFirst(first);
+  }
+  function validate() {
+    var errs = [];
+    var any = qtys.some(function (q) { return parseInt(q.querySelector('input').value, 10) > 0; });
+    if (!any) errs.push([grid, 'Bitte wähle mindestens ein Produkt aus (Menge mit + erhöhen).']);
+    if (form.name.value.trim().length < 2) errs.push([form.name, 'Bitte gib deinen Namen an.']);
+    var ph = form.phone.value.trim(), em = form.email.value.trim();
+    if (!ph && !em) errs.push([form.phone, 'Bitte gib eine Telefonnummer oder E-Mail-Adresse an, damit wir dich erreichen können.']);
+    else {
+      if (ph && !/^[0-9 +\/()-]{6,25}$/.test(ph)) errs.push([form.phone, 'Die Telefonnummer scheint nicht zu stimmen.']);
+      if (em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) errs.push([form.email, 'Die E-Mail-Adresse scheint nicht zu stimmen.']);
+    }
+    if (!form.wish_date.value) errs.push([form.wish_date, 'Bitte wähle einen Wunschtermin für die Abholung.']);
+    else if (!form.wish_date.checkValidity()) errs.push([form.wish_date, form.wish_date.validationMessage || 'Bitte einen anderen Termin wählen.']);
+    if (!form.dsgvo.checked) errs.push([form.dsgvo, 'Bitte bestätige die Speicherung deiner Angaben.']);
+    return errs;
+  }
+  [form.name, form.phone, form.email, form.dsgvo].forEach(function (el) {
+    el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', function () { if (el.getAttribute('aria-invalid')) clearErr(el); });
+  });
 
   form.addEventListener('submit', async function (ev) {
     ev.preventDefault();
     var items = qtys.map(function (q) { return { id: parseInt(q.dataset.id, 10), qty: parseInt(q.querySelector('input').value, 10) || 0 }; })
       .filter(function (x) { return x.qty > 0; });
-    if (!items.length) return showErrors(['Bitte wähle zuerst mindestens ein Produkt aus.']);
-    if (!form.phone.value.trim() && !form.email.value.trim()) return showErrors(['Bitte gib Telefon oder E-Mail an.']);
-    if (!form.checkValidity()) return form.reportValidity();
+    clearAll();
+    var errs = validate();
+    if (errs.length) {
+      errs.forEach(function (e) { fieldErr(e[0], e[1]); });
+      return focusFirst(errs[0][0]);
+    }
     if (form.firma.value || Date.now() - loadedAt < 3000) return; // Spamschutz
     var btn = document.getElementById('submitbtn');
     btn.disabled = true; btn.textContent = 'Wird gesendet …';
@@ -121,7 +222,7 @@
       wish_date: form.wish_date.value, wish_time: form.wish_time.value, items: items
     } });
     btn.disabled = false; btn.textContent = 'Jetzt unverbindlich reservieren';
-    if (res.error) return showErrors(['Senden fehlgeschlagen – bitte erneut versuchen oder anrufen.']);
+    if (res.error) return generalErr(['Senden fehlgeschlagen – bitte erneut versuchen oder anrufen.']);
     if (!res.data || !res.data.ok) return showErrors((res.data && res.data.errors) || ['Unbekannter Fehler.']);
     location.href = 'status.html?c=' + encodeURIComponent(res.data.code) + '&t=' + encodeURIComponent(res.data.token) + '&neu=1';
   });

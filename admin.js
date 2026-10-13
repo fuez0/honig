@@ -417,7 +417,7 @@
       ['whatsapp', 'WhatsApp-Nummer (optional, wird auf der Website angezeigt)']]],
     ['Reservierung & Abholung', [['reservierung_offen', 'Online-Reservierung ist geöffnet (ausschalten z. B. im Urlaub)', 'bool'],
       ['abholzeiten', 'Abholzeiten (Text auf der Website)', 'area'], ['abholtage', 'Wählbare Abholtage (keiner = alle)', 'days'],
-      ['zeitfenster', 'Zeitfenster zur Auswahl (mit Komma getrennt, leer = keine Auswahl)', 'full'],
+      ['zeitfenster', 'Zeitfenster zur Auswahl – mit Komma getrennt, Wochentag davor (z. B. „Fr 15:00 – 18:00, Sa 09:00 – 12:00“); ohne Wochentag gilt es für jeden Tag, leer = keine Auswahl', 'full'],
       ['vorlauf_tage', 'Frühestens … Tage im Voraus', 'num'], ['max_tage_voraus', 'Höchstens … Tage im Voraus', 'num'],
       ['zahlung', 'Zahlungshinweis', 'full'], ['pfand', 'Hinweis Gläser-Rückgabe (leer = ausblenden)', 'full']]],
     ['Texte & Bilder', [['banner', 'Hinweis-Banner ganz oben (leer = aus), z. B. „Neue Ernte: Waldhonig ab sofort erhältlich!“', 'full'],
