@@ -259,6 +259,7 @@
       e.preventDefault();
       var d = formData(this);
       d.items = Array.prototype.map.call(this.querySelectorAll('[data-pid]'), function (i) { return { id: +i.dataset.pid, qty: +i.value || 0 }; });
+      d.quelle = 'telefon';
       var x = await sb.rpc('create_reservation', { p: d });
       if (x.error) return err(x.error);
       if (!x.data.ok) return flash(x.data.errors.join(' '), 'err');
