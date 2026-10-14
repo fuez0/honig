@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, follow">
+<base href="https://honig.x10.mx/">
 <title>Meine Reservierung</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 <div id="site-header"></div>
@@ -41,7 +42,7 @@
     var box = document.getElementById('meine');
     var a = merkListe();
     if (!box || !a.length) return;
-    box.innerHTML = '<div class="panel" style="margin-bottom:20px"><h2 style="margin-top:0">Auf diesem Gerät gespeichert</h2><p class="small muted">Deine letzten Reservierungen – einfach antippen, keine Nummer nötig.</p><div id="meine-l"><p class="muted">Wird geladen …</p></div></div>';
+    box.innerHTML = '<div class="panel merk"><h2>Auf diesem Gerät gespeichert</h2><p class="small muted">Deine letzten Reservierungen – einfach antippen, keine Nummer nötig.</p><div id="meine-l"><p class="muted">Wird geladen …</p></div></div>';
     var rows = await Promise.all(a.map(async function (x) {
       try { var res = await H.sb.rpc('get_reservation', { p_code: x.c, p_token: x.t }); return { x: x, r: res.data, err: res.error }; }
       catch (e) { return { x: x, r: null, err: e }; }
@@ -53,8 +54,8 @@
       if (!o.r && !o.err) { vergessen(o.x.c); return; } // gelöscht oder ungültig
       var r = o.r, s = r ? r.status : '';
       var url = 'status.html?c=' + encodeURIComponent(o.x.c) + '&t=' + encodeURIComponent(o.x.t);
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 0;border-top:1px solid #eee">' +
-        '<a href="' + url + '" style="flex:1;min-width:0;text-decoration:none;color:inherit"><strong style="font-family:ui-monospace,Menlo,monospace">' + esc(o.x.c) + '</strong>' +
+      html += '<div class="merk-row">' +
+        '<a class="merk-link" href="' + url + '"><strong class="mono">' + esc(o.x.c) + '</strong>' +
         (r ? ' <span class="status status-' + esc(s) + '">' + esc(H.STATUS[s] || s) + '</span>' : '') +
         '<br><span class="small muted">' + (r ? (s === 'neu' ? 'Wunschtermin ' : 'Abholung ') + H.dateDe(r.pickup_date || r.wish_date) + ' · ' + H.euro(r.total_cents) : 'Status gerade nicht abrufbar') + '</span></a>' +
         '<button type="button" class="btn btn-small btn-grey" data-weg="' + esc(o.x.c) + '" aria-label="' + esc(o.x.c) + ' von diesem Gerät entfernen">Entfernen</button></div>';

@@ -302,3 +302,8 @@ body.has-cartbar #produkte{padding-bottom:110px}
 .qty.qty-s button{width:36px;height:36px;font-size:1.15rem}
 .qty.qty-s input,.qty.qty-s span{width:30px;text-align:center;font-weight:700}
 .linkbtn{background:none;border:0;padding:4px 2px;color:var(--honey-d);text-decoration:underline;cursor:pointer;font:inherit;font-size:.88rem}
+.hero{--hero:url('https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?w=1800&q=70&auto=format&fit=crop')}
+.merk{margin-bottom:20px}.merk h2{margin-top:0}
+.merk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 0;border-top:1px solid #eee}
+.merk-link{flex:1;min-width:0;text-decoration:none;color:inherit}
+.mono{font-family:ui-monospace,Menlo,monospace}
