@@ -141,7 +141,7 @@
       '<a class="btn btn-small btn-green" href="#/neu">+ Telefonische Reservierung</a></div>' +
       '<form id="sf"><input name="q" placeholder="Suche Name, Nr., Telefon…" value="' + esc(search) + '"><button class="btn btn-small">Suchen</button></form></div>';
     if (!rows.length) html += '<div class="panel muted">Keine Reservierungen in dieser Ansicht.</div>';
-    else html += '<table class="atbl"><tr><th>Nr.</th><th>Kunde</th><th class="hide-m">Produkte</th><th>Termin</th><th class="r">Summe</th><th>Status</th></tr>' +
+    else html += '<table class="atbl m-res"><tr class="hd"><th>Nr.</th><th>Kunde</th><th class="hide-m">Produkte</th><th>Termin</th><th class="r">Summe</th><th>Status</th></tr>' +
       rows.map(function (r) {
         var conf = r.status === 'bestaetigt' || r.status === 'abgeholt';
         return '<tr class="click" data-id="' + r.id + '"><td><a href="#/r/' + r.id + '"><strong>' + esc(r.code) + '</strong></a><br><span class="small muted">' + esc(H.dtDe(r.created_at)) + '</span></td>' +
@@ -192,7 +192,7 @@
       (r.pickup_date ? '<br><strong>Bestätigter Termin:</strong> ' + H.dateDe(r.pickup_date) + (r.pickup_time ? ', ' + esc(r.pickup_time) : '') : '') + '</p>' +
       (r.note ? '<div class="callout"><strong>Anmerkung Kunde:</strong><br>' + H.nl(r.note) + '</div>' : '') +
       '<table class="tbl">' + items.map(function (i) {
-        return '<tr><td>' + i.qty + ' ×</td><td>' + esc(i.product_name) + ' <span class="muted">' + esc(i.unit) + '</span></td><td class="r">' + euro(i.price_cents * i.qty) + '</td></tr>';
+        return '<tr><td style="white-space:nowrap">' + i.qty + '\u00a0×</td><td>' + esc(i.product_name) + ' <span class="muted">' + esc(i.unit) + '</span></td><td class="r">' + euro(i.price_cents * i.qty) + '</td></tr>';
       }).join('') + '<tr class="sum"><td></td><td>Summe</td><td class="r">' + euro(r.total_cents) + '</td></tr></table></div>' +
       '<form class="panel noprint" id="notef" style="margin-top:16px"><label>Interne Notiz (sieht nur ihr)<textarea name="admin_note" rows="2">' + esc(r.admin_note) + '</textarea></label>' +
       '<p><button class="btn btn-small btn-grey">Notiz speichern</button></p></form></div><div class="noprint">';
@@ -250,7 +250,7 @@
     app.innerHTML = '<p><a href="#/">← Zurück</a></p><h1>Telefonische Reservierung</h1><form class="panel" id="nf"><div class="formgrid">' +
       '<label>Name *<input name="name" required></label><label>Telefon<input name="phone"></label><label>E-Mail<input type="email" name="email"></label>' +
       '<label>Wunschtermin<input type="date" name="wish_date"></label><label>Uhrzeit<input name="wish_time" placeholder="z. B. 16:00"></label>' +
-      '<label class="full">Anmerkung<textarea name="note" rows="2"></textarea></label></div><h3 style="margin-top:20px">Produkte</h3><table class="atbl">' +
+      '<label class="full">Anmerkung<textarea name="note" rows="2"></textarea></label></div><h3 style="margin-top:20px">Produkte</h3><table class="atbl m-new">' +
       p.data.map(function (x) {
         return '<tr><td>' + esc(x.name) + ' <span class="muted">' + esc(x.unit) + '</span></td><td>' + euro(x.price_cents) + '</td><td class="small muted">' +
           (x.stock == null ? 'unbegrenzt' : x.stock + ' lagernd') + '</td><td style="width:110px"><input type="number" min="0" max="99" value="0" data-pid="' + x.id + '"></td></tr>';
@@ -288,7 +288,7 @@
       Object.keys(totals).map(function (k) { return '<tr><td style="width:60px"><strong>' + totals[k] + ' ×</strong></td><td>' + esc(k) + '</td></tr>'; }).join('') +
       '<tr class="sum"><td></td><td>Erwartete Einnahmen: ' + euro(sum) + '</td></tr></table></div>';
     if (!rows.length) html += '<div class="panel muted">Für diesen Tag gibt es keine Abholungen.</div>';
-    else html += '<table class="atbl"><tr><th>☐</th><th>Zeit</th><th>Kunde</th><th>Produkte</th><th class="r">Summe</th></tr>' + rows.map(function (r) {
+    else html += '<table class="atbl m-pick"><tr class="hd"><th>☐</th><th>Zeit</th><th>Kunde</th><th>Produkte</th><th class="r">Summe</th></tr>' + rows.map(function (r) {
       return '<tr><td>☐</td><td>' + esc(r.pickup_time || r.wish_time || '–') + (r.status === 'neu' ? '<br><span class="status status-neu">unbestätigt</span>' : '') + '</td>' +
         '<td><a href="#/r/' + r.id + '"><strong>' + esc(r.name) + '</strong></a><br><span class="small">' + esc(r.code) + ' · ' + esc(r.phone) + '</span>' +
         (r.note ? '<br><span class="small muted">' + esc(r.note) + '</span>' : '') + '</td><td class="small">' +
@@ -304,7 +304,7 @@
     var p = await sb.from('products').select('*').order('sort').order('id');
     if (p.error) throw p.error;
     app.innerHTML = '<div class="toolbar"><h1 style="margin:0">Produkte</h1><a class="btn btn-green" href="#/p/neu">+ Neues Produkt</a></div>' +
-      '<table class="atbl"><tr><th></th><th>Produkt</th><th>Preis</th><th>Bestand</th><th class="hide-m">Sichtbar</th><th></th></tr>' +
+      '<table class="atbl m-prod"><tr class="hd"><th></th><th>Produkt</th><th>Preis</th><th>Bestand</th><th class="hide-m">Sichtbar</th><th></th></tr>' +
       p.data.map(function (x) {
         return '<tr><td><img src="' + esc(H.imgSrc(x.image_url)) + '" alt=""></td><td><strong>' + esc(x.name) + '</strong><br><span class="small muted">' + esc(x.unit) + '</span></td>' +
           '<td>' + euro(x.price_cents) + '</td><td style="width:110px"><input type="number" min="0" data-stock="' + x.id + '" value="' + (x.stock == null ? '' : x.stock) + '" placeholder="∞"></td>' +
@@ -477,7 +477,7 @@
     var r = await sb.from('admins').select('*').order('created_at');
     if (r.error) throw r.error;
     var myId = (await sb.auth.getUser()).data.user.id;
-    app.innerHTML = '<h1>Benutzer</h1><table class="atbl"><tr><th>Name</th><th>E-Mail</th><th>Status</th><th></th></tr>' +
+    app.innerHTML = '<h1>Benutzer</h1><table class="atbl m-user"><tr class="hd"><th>Name</th><th>E-Mail</th><th>Status</th><th></th></tr>' +
       r.data.map(function (a) {
         var self = a.user_id === myId;
         return '<tr><td>' + esc(a.name) + (self ? ' <span class="small muted">(du)</span>' : '') + '</td><td class="small">' + esc(a.email) + '</td>' +

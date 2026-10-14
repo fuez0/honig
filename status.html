@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Meine Reservierung</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div id="site-header"></div>
@@ -14,7 +14,7 @@
 <div id="site-footer"></div>
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=8"></script>
+<script src="common.js?v=9"></script>
 <script>
 (async function () {
   var H = Honig, esc = H.esc, main = document.getElementById('main');
@@ -23,8 +23,52 @@
   var q = new URLSearchParams(location.search);
   var code = q.get('c'), token = q.get('t');
 
+  // Reservierungen auf diesem Gerät merken (nur im Browser, max. 10)
+  var KEY = 'honig_meine_reservierungen';
+  function merkListe() { try { var a = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function merkSpeichern(a) { try { localStorage.setItem(KEY, JSON.stringify(a.slice(0, 10))); } catch (e) {} }
+  function merken(r, t) {
+    var alt = merkListe(), vorher = alt.filter(function (x) { return x.c === r.code; })[0];
+    var a = alt.filter(function (x) { return x.c !== r.code; });
+    var z = Date.parse(r.created_at) || (vorher && vorher.z) || Date.now(); // Zeitpunkt der Reservierung, nicht des Aufrufs
+    a.push({ c: r.code, t: t, d: r.pickup_date || r.wish_date || '', z: z });
+    a.sort(function (x, y) { return (y.z || 0) - (x.z || 0); });
+    merkSpeichern(a);
+  }
+  function vergessen(c) { merkSpeichern(merkListe().filter(function (x) { return x.c !== c; })); }
+
+  async function geraetListe() {
+    var box = document.getElementById('meine');
+    var a = merkListe();
+    if (!box || !a.length) return;
+    box.innerHTML = '<div class="panel" style="margin-bottom:20px"><h2 style="margin-top:0">Auf diesem Gerät gespeichert</h2><p class="small muted">Deine letzten Reservierungen – einfach antippen, keine Nummer nötig.</p><div id="meine-l"><p class="muted">Wird geladen …</p></div></div>';
+    var rows = await Promise.all(a.map(async function (x) {
+      try { var res = await H.sb.rpc('get_reservation', { p_code: x.c, p_token: x.t }); return { x: x, r: res.data, err: res.error }; }
+      catch (e) { return { x: x, r: null, err: e }; }
+    }));
+    var html = '';
+    rows.forEach(function (o) { if (o.r && Date.parse(o.r.created_at)) o.x.z = Date.parse(o.r.created_at); });
+    rows.sort(function (p, q) { return (q.x.z || 0) - (p.x.z || 0); }); // neueste zuerst
+    rows.forEach(function (o) {
+      if (!o.r && !o.err) { vergessen(o.x.c); return; } // gelöscht oder ungültig
+      var r = o.r, s = r ? r.status : '';
+      var url = 'status.html?c=' + encodeURIComponent(o.x.c) + '&t=' + encodeURIComponent(o.x.t);
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 0;border-top:1px solid #eee">' +
+        '<a href="' + url + '" style="flex:1;min-width:0;text-decoration:none;color:inherit"><strong style="font-family:ui-monospace,Menlo,monospace">' + esc(o.x.c) + '</strong>' +
+        (r ? ' <span class="status status-' + esc(s) + '">' + esc(H.STATUS[s] || s) + '</span>' : '') +
+        '<br><span class="small muted">' + (r ? (s === 'neu' ? 'Wunschtermin ' : 'Abholung ') + H.dateDe(r.pickup_date || r.wish_date) + ' · ' + H.euro(r.total_cents) : 'Status gerade nicht abrufbar') + '</span></a>' +
+        '<button type="button" class="btn btn-small btn-grey" data-weg="' + esc(o.x.c) + '" aria-label="' + esc(o.x.c) + ' von diesem Gerät entfernen">Entfernen</button></div>';
+    });
+    var l = document.getElementById('meine-l');
+    if (!html) { box.innerHTML = ''; return; }
+    l.innerHTML = html;
+    l.querySelectorAll('[data-weg]').forEach(function (b) {
+      b.addEventListener('click', function () { vergessen(this.getAttribute('data-weg')); geraetListe(); });
+    });
+  }
+
   function lookupForm(err, c) {
-    main.innerHTML = '<h1>Meine Reservierung</h1><p>Gib deine Reservierungsnummer und die Telefonnummer oder E-Mail-Adresse ein, die du bei der Reservierung angegeben hast.</p>' +
+    main.innerHTML = '<h1>Meine Reservierung</h1><div id="meine"></div><p>Gib deine Reservierungsnummer und die Telefonnummer oder E-Mail-Adresse ein, die du bei der Reservierung angegeben hast.</p>' +
       (err ? '<div class="flash flash-err">' + esc(err) + '</div>' : '') +
       '<form class="panel fields" id="lf"><label>Reservierungsnummer<input name="c" placeholder="H-XXXXX" required autocapitalize="characters" value="' + esc(c || '') + '"></label>' +
       '<label>Telefon oder E-Mail<input name="k" required></label><button class="btn">Status anzeigen</button></form>';
@@ -34,19 +78,21 @@
       if (r.data && r.data.ok) location.href = 'status.html?c=' + encodeURIComponent(r.data.code) + '&t=' + encodeURIComponent(r.data.token);
       else lookupForm((r.data && r.data.error) || 'Abfrage fehlgeschlagen.', this.c.value);
     });
+    geraetListe();
   }
 
   if (!code || !token) return lookupForm();
   var res = await H.sb.rpc('get_reservation', { p_code: code, p_token: token });
   var r = res.data;
-  if (!r) return lookupForm('Link ungültig oder Reservierung nicht gefunden.', code);
+  if (!r) { vergessen(code); return lookupForm('Link ungültig oder Reservierung nicht gefunden.', code); }
+  merken(r, token);
 
   var s = r.status, when = H.dateDe(r.pickup_date || r.wish_date) + ((r.pickup_time || r.wish_time) ? ', ' + esc(r.pickup_time || r.wish_time) : '');
   var html = '';
   if (q.get('neu')) {
     html += '<div class="thanks"><div class="big">🍯</div><h1>Danke, ' + esc(r.name.split(' ')[0]) + '!</h1>' +
       '<p>Deine Reservierung ist eingegangen. Wir melden uns und bestätigen den Abholtermin.</p>' +
-      '<p class="small muted">Tipp: Speichere diese Seite als Lesezeichen – hier siehst du jederzeit den aktuellen Status.</p></div>';
+      '<p class="small muted">Diese Reservierung ist auf diesem Gerät gespeichert – unter „Meine Reservierung“ findest du sie jederzeit wieder. Notiere dir trotzdem die Nummer, falls du ein anderes Gerät nutzt.</p></div>';
   }
   html += '<div class="panel"><div class="res-head"><div><span class="muted small">Reservierungsnummer</span><div class="code">' + esc(r.code) + '</div></div>' +
     '<span class="status status-' + esc(s) + '">' + esc(H.STATUS[s] || s) + '</span></div>';
@@ -65,7 +111,7 @@
     return '<tr><td>' + i.qty + ' ×</td><td>' + esc(i.name) + ' <span class="muted">' + esc(i.unit) + '</span></td><td class="r">' + H.euro(i.price_cents * i.qty) + '</td></tr>';
   }).join('') + '<tr class="sum"><td></td><td>Summe (zahlbar bei Abholung)</td><td class="r">' + H.euro(r.total_cents) + '</td></tr></table>';
   if (s === 'neu' || s === 'bestaetigt') html += '<button class="btn btn-ghost-dark" id="storno">Reservierung stornieren</button>';
-  html += '</div><p><a href="./">← Zurück zur Startseite</a></p>';
+  html += '</div><p><a href="status.html">Alle meine Reservierungen</a> · <a href="./">← Zurück zur Startseite</a></p>';
   main.innerHTML = html;
   var b = document.getElementById('storno');
   if (b) b.addEventListener('click', async function () {

@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#9a5c05">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <div id="site-header"><header class="topbar"><div class="wrap topbar-in"><a class="brand" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>Imkerei Josef Filz</span></a></div></header></div>
@@ -80,6 +80,11 @@
 </section>
 </form>
 
+<div class="cartbar" id="cartbar" role="region" aria-label="Deine Auswahl" aria-hidden="true">
+  <span class="cb-info" id="cbinfo"></span>
+  <a class="btn btn-small" href="#reservieren" id="cbbtn" tabindex="-1"><span class="cb-long">Weiter zur Reservierung</span><span class="cb-short">Weiter</span> →</a>
+</div>
+
 <section id="abholung" class="section">
   <div class="wrap two">
     <div>
@@ -119,7 +124,7 @@
 
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=8"></script>
-<script src="shop.js?v=7"></script>
+<script src="common.js?v=9"></script>
+<script src="shop.js?v=8"></script>
 </body>
 </html>

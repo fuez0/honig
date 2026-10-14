@@ -65,7 +65,13 @@
   var d = form.wish_date;
   d.min = H.todayVienna(parseInt(st.vorlauf_tage || '1', 10));
   d.max = H.todayVienna(parseInt(st.max_tage_voraus || '60', 10));
-  document.getElementById('dayhint').textContent = days.length ? 'Abholung möglich: ' + days.map(function (x) { return H.WEEKDAYS[x]; }).join(', ') : '';
+  (function () {
+    var vor = Math.max(0, parseInt(st.vorlauf_tage || '1', 10) || 0), maxT = parseInt(st.max_tage_voraus || '60', 10) || 60;
+    var ab = vor === 0 ? 'ab heute' : vor === 1 ? 'ab morgen' : 'ab ' + H.dateDe(d.min, false).slice(0, 6);
+    var txt = 'Reservierungen ' + ab + ', bis zu ' + maxT + ' Tage im Voraus (spätestens ' + H.dateDe(d.max) + ').';
+    if (days.length) txt += ' Abholung möglich: ' + days.map(function (x) { return H.WEEKDAYS[x]; }).join(', ') + '.';
+    document.getElementById('dayhint').textContent = txt;
+  })();
   var VB = 'nach Vereinbarung';
   var hasSlots = H.slots(st).length > 0;
   var timeHint = document.createElement('p'); timeHint.className = 'hint'; timeHint.id = 'timehint';
@@ -105,18 +111,60 @@
     var max = parseInt(inp.max || '99', 10), v = parseInt(inp.value || '0', 10);
     if (isNaN(v) || v < 0) v = 0; if (v > max) v = max; inp.value = v;
   }
+  var sumlist = document.getElementById('sumlist'), cartbar = document.getElementById('cartbar'), resSec = document.getElementById('reservieren');
+  var resVisible = false, cartCount = 0;
+  function qtyById(id) { return qtys.filter(function (q) { return q.dataset.id === String(id); })[0]; }
+  function setQty(id, n) {
+    var q = qtyById(id); if (!q) return;
+    q.querySelector('input').value = n; update();
+  }
   function update() {
-    var total = 0, html = '';
+    var total = 0, html = '', count = 0, allGlas = true;
     qtys.forEach(function (q) {
       var inp = q.querySelector('input'); clamp(inp);
-      var n = parseInt(inp.value, 10), p = parseInt(q.dataset.price, 10);
+      var n = parseInt(inp.value, 10), p = parseInt(q.dataset.price, 10), max = parseInt(inp.max || '99', 10);
       q.classList.toggle('active', n > 0);
-      if (n > 0) { total += n * p; html += '<li><span>' + n + ' × ' + esc(q.dataset.name) + '</span><span>' + H.euro(n * p) + '</span></li>'; }
+      if (n > 0) {
+        total += n * p; count += n;
+        if (!/glas/i.test(q.dataset.name)) allGlas = false;
+        html += '<li class="sl" data-id="' + esc(q.dataset.id) + '"><span class="sl-name">' + esc(q.dataset.name) + '</span><span class="sl-sum">' + H.euro(n * p) + '</span>' +
+          '<span class="sl-ctrl"><span class="qty qty-s"><button type="button" data-act="minus" aria-label="' + esc(q.dataset.name) + ' – eins weniger">−</button>' +
+          '<span aria-live="polite">' + n + '</span>' +
+          '<button type="button" data-act="plus" aria-label="' + esc(q.dataset.name) + ' – eins mehr"' + (n >= max ? ' disabled' : '') + '>+</button></span>' +
+          '<button type="button" class="linkbtn" data-act="del" aria-label="' + esc(q.dataset.name) + ' entfernen">Entfernen</button></span></li>';
+      }
     });
-    document.getElementById('sumlist').innerHTML = html || '<li class="muted">Noch nichts ausgewählt – oben Menge wählen.</li>';
+    sumlist.innerHTML = html || '<li class="muted">Noch nichts ausgewählt – oben Menge wählen.</li>';
     document.getElementById('sumtotal').textContent = H.euro(total);
+    cartCount = count;
+    var unit = allGlas ? (count === 1 ? 'Glas' : 'Gläser') : 'Artikel';
+    document.getElementById('cbinfo').textContent = count + ' ' + unit + ' · ' + H.euro(total);
+    toggleBar();
     if (total > 0 && grid.classList.contains('invalid')) clearErr(grid);
   }
+  function toggleBar() {
+    var show = cartCount > 0 && !resVisible;
+    cartbar.classList.toggle('show', show);
+    cartbar.setAttribute('aria-hidden', show ? 'false' : 'true');
+    document.getElementById('cbbtn').tabIndex = show ? 0 : -1;
+    document.body.classList.toggle('has-cartbar', show);
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (en) { resVisible = en[0].isIntersecting; toggleBar(); }, { threshold: 0.15 }).observe(resSec);
+  }
+  document.getElementById('cbbtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    resSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function () { try { form.name.focus({ preventScroll: true }); } catch (x) {} }, 500);
+  });
+  sumlist.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]'); if (!b) return;
+    var li = b.closest('li'), q = qtyById(li.dataset.id); if (!q) return;
+    var n = parseInt(q.querySelector('input').value, 10) || 0, act = b.dataset.act;
+    setQty(li.dataset.id, act === 'plus' ? n + 1 : act === 'minus' ? Math.max(0, n - 1) : 0);
+    var again = sumlist.querySelector('li[data-id="' + li.dataset.id + '"] button[data-act="' + act + '"]');
+    if (again && !again.disabled) again.focus();
+  });
   qtys.forEach(function (q) {
     var inp = q.querySelector('input');
     q.querySelector('.qminus').addEventListener('click', function () { inp.value = Math.max(0, (parseInt(inp.value, 10) || 0) - 1); update(); });

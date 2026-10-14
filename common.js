@@ -22,7 +22,7 @@ if (location.hostname === 'fuez0.github.io') {
   }
   function nl(s) { return esc(s).replace(/\n/g, '<br>'); }
   function euro(c) {
-    return '€ ' + ((c || 0) / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return '€\u00a0' + ((c || 0) / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
   function parseEuro(s) {
     s = String(s || '').replace(/[€\s]/g, '');

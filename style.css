@@ -75,8 +75,9 @@ h1{font-size:clamp(2rem,5vw,3.4rem)} h2{font-size:clamp(1.6rem,3.5vw,2.3rem)} h3
 
 .section{padding:70px 0}
 .section-alt{background:var(--cream2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px;margin-top:20px}
-.card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;margin-top:20px}
+.card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;flex:0 1 calc((100% - 44px) / 3)}
+@media (max-width:900px){.card{flex-basis:calc((100% - 22px) / 2)}}
 .card-img{aspect-ratio:4/3;background:var(--cream2);overflow:hidden}
 .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .card:hover .card-img img{transform:scale(1.04)}
@@ -200,3 +201,104 @@ legend{font-weight:700;color:var(--honey-dd);padding:0 6px}
 @media print{.abar,.noprint,.footer{display:none!important}body{background:#fff}.atbl{box-shadow:none}}
 
 [hidden]{display:none!important}
+
+/* ---------- Verwaltung am Handy ---------- */
+@media (max-width:700px){
+  .abar{position:sticky;top:0;z-index:20}
+  .abar-in{flex-direction:column;align-items:stretch;gap:0;padding-top:8px;flex-wrap:nowrap}
+  .abar nav{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:8px 16px 10px;margin:0 -16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .abar nav::-webkit-scrollbar{display:none}
+  .abar nav a{white-space:nowrap;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.14);opacity:1;font-size:.95rem}
+  .abar nav a.on{background:#fff;color:var(--honey-dd);text-decoration:none}
+  .amain{padding-top:16px}
+  .kpis{grid-template-columns:repeat(3,1fr);gap:8px}
+  .kpi{padding:10px 12px;font-size:.85rem;line-height:1.25}
+  .kpi b{font-size:1.45rem;margin-bottom:2px}
+  .toolbar form{width:100%}
+  .toolbar input{max-width:none;flex:1;min-width:0}
+  .panel{padding:18px}
+  ol strong{overflow-wrap:anywhere}
+
+  /* Tabellen werden zu Karten */
+  .atbl,.atbl tbody{display:block}
+  .atbl tr.hd{display:none}
+  .atbl tr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 14px;border-bottom:1px solid #f0e4cf;align-items:start}
+  .atbl tr:last-child{border-bottom:0}
+  .atbl td{padding:0;border:0;min-width:0}
+
+  .m-res tr{grid-template-areas:"nr st" "ku su" "te te"}
+  .m-res td:nth-child(1){grid-area:nr}
+  .m-res td:nth-child(2){grid-area:ku}
+  .m-res td:nth-child(4){grid-area:te;font-size:.95rem}
+  .m-res td:nth-child(5){grid-area:su;text-align:right;font-weight:700}
+  .m-res td:nth-child(6){grid-area:st;text-align:right}
+
+  .m-pick tr{grid-template-areas:"ze su" "ku ku" "pr pr"}
+  .m-pick td:nth-child(1){display:none}
+  .m-pick td:nth-child(2){grid-area:ze;font-weight:700}
+  .m-pick td:nth-child(3){grid-area:ku}
+  .m-pick td:nth-child(4){grid-area:pr;background:var(--cream);border-radius:8px;padding:6px 10px}
+  .m-pick td:nth-child(5){grid-area:su;font-weight:700}
+
+  .m-prod tr{grid-template-columns:56px 1fr auto;grid-template-areas:"im na pr" "im bs bs" "bt bt bt"}
+  .m-prod td:nth-child(1){grid-area:im}
+  .m-prod td:nth-child(2){grid-area:na}
+  .m-prod td:nth-child(3){grid-area:pr;font-weight:700;white-space:nowrap}
+  .m-prod td:nth-child(4){grid-area:bs;width:auto!important;display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)}
+  .m-prod td:nth-child(4):before{content:"Bestand"}
+  .m-prod td:nth-child(4) input{width:90px;padding:.4em .6em}
+  .m-prod td:nth-child(6){grid-area:bt;text-align:left!important;display:flex;gap:8px;margin-top:4px}
+  .m-prod td:nth-child(6) .btn{flex:1}
+
+  .m-user tr{grid-template-areas:"na st" "em em" "bt bt"}
+  .m-user td:nth-child(1){grid-area:na;font-weight:600}
+  .m-user td:nth-child(2){grid-area:em;overflow-wrap:anywhere;color:var(--muted)}
+  .m-user td:nth-child(3){grid-area:st;font-size:.9rem}
+  .m-user td:nth-child(4){grid-area:bt;text-align:left!important;display:flex;gap:8px}
+  .m-user td:nth-child(4):empty{display:none}
+  .m-user td:nth-child(4) .btn{flex:1}
+
+  .m-new tr{grid-template-columns:1fr 80px;grid-template-areas:"na in" "pr in" "st in";gap:0 12px}
+  .m-new td:nth-child(1){grid-area:na;font-weight:600}
+  .m-new td:nth-child(2){grid-area:pr}
+  .m-new td:nth-child(3){grid-area:st}
+  .m-new td:nth-child(4){grid-area:in;width:auto!important;align-self:center}
+  .m-new td:nth-child(4) input{text-align:center;font-size:1.1rem}
+}
+
+/* ---------- Handy: kompakte Produktliste ---------- */
+@media (max-width:600px){
+  .grid{gap:12px}
+  .card{flex:1 1 100%;flex-direction:row}
+  .card-img{aspect-ratio:auto;width:104px;flex:none}
+  .card:hover .card-img img{transform:none}
+  .card-body{padding:12px 14px}
+  .card h3{font-size:1.1rem}
+  .unit{margin:0 0 .3em;font-size:.85rem}
+  .desc{font-size:.88rem;margin:0 0 .6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card-foot{gap:6px}
+  .price{font-size:1.15rem}
+  .qty button{width:42px;height:42px}
+  .qty input{width:34px;height:42px}
+}
+/* ---------- Feste Warenkorb-Leiste ---------- */
+.cartbar{position:fixed;left:50%;bottom:14px;transform:translate(-50%,140%);z-index:40;width:min(560px,calc(100% - 24px));
+  display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--honey-dd);color:#fff;
+  border-radius:999px;padding:8px 8px 8px 20px;box-shadow:0 10px 30px rgba(60,35,0,.35);transition:transform .25s ease;font-weight:600}
+.cartbar.show{transform:translate(-50%,0)}
+.cartbar .cb-info{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cartbar .btn{background:#fff;color:var(--honey-dd);flex:none;padding:.7em 1.2em}
+.cartbar .btn:hover{background:var(--cream)}
+@media (prefers-reduced-motion:reduce){.cartbar{transition:none}}
+body.has-cartbar .footer{padding-bottom:90px}
+body.has-cartbar #produkte{padding-bottom:110px}
+.cartbar .cb-short{display:none}
+@media (max-width:480px){.cartbar .cb-long{display:none}.cartbar .cb-short{display:inline}.cartbar{padding-left:16px}}
+/* ---------- Auswahl bearbeiten ---------- */
+.summary li.sl{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:10px 0}
+.summary li.sl .sl-name{font-weight:600}
+.summary li.sl .sl-sum{text-align:right;font-weight:600}
+.summary li.sl .sl-ctrl{display:flex;align-items:center;gap:10px;grid-column:1/-1}
+.qty.qty-s button{width:36px;height:36px;font-size:1.15rem}
+.qty.qty-s input,.qty.qty-s span{width:30px;text-align:center;font-weight:700}
+.linkbtn{background:none;border:0;padding:4px 2px;color:var(--honey-d);text-decoration:underline;cursor:pointer;font:inherit;font-size:.88rem}
