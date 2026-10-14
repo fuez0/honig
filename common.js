@@ -108,7 +108,8 @@ if (location.hostname === 'fuez0.github.io') {
       '</div><div class="wrap small muted">Alle Produkte nur zur Selbstabholung ab Hof – kein Versand. © ' + new Date().getFullYear() + ' ' + esc(st.hof_name) + '</div></footer>';
   }
   function applyChrome(st, title) {
-    document.title = (title ? title + ' · ' : '') + (st.hof_name || 'Honig ab Hof') + (title ? '' : ' – Honig ab Hof');
+    // Startseite: SEO-Titel aus index.html behalten
+    if (title) document.title = title + ' · ' + (st.hof_name || 'Honig ab Hof');
     var h = document.getElementById('site-header');
     if (h) {
       h.innerHTML = header(st);
