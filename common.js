@@ -1,4 +1,8 @@
 /* Gemeinsame Funktionen für Website und Verwaltung */
+// Alte GitHub-Adresse → eigene Domain
+if (location.hostname === 'fuez0.github.io') {
+  location.replace('https://honig.x10.mx' + location.pathname.replace(/^\/honig/, '') + location.search + location.hash);
+}
 (function () {
   var cfg = window.HONIG_CONFIG;
   var sb = window.supabase.createClient(cfg.url, cfg.key, {

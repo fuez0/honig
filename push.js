@@ -30,7 +30,7 @@
   }
   async function save(sub) {
     var j = sub.toJSON();
-    var x = await sb.from('push_subscriptions').upsert({ endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, device: deviceName() }, { onConflict: 'endpoint' });
+    var x = await sb.from('push_subscriptions').upsert({ endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth, device: deviceName(), origin: location.origin }, { onConflict: 'endpoint' });
     if (x.error) throw x.error;
   }
   async function enable() {

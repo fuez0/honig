@@ -1,15 +1,8 @@
-# Honig ab Hof – Imkerei Josef Filz
+# Honig-Website Josef Filz
 
-Website mit Online-Reservierung (nur Selbstabholung). Statische Seiten auf GitHub Pages, Daten in Supabase (Projekt „Honig Filz“, Frankfurt).
+Statische Website (HTML/JS) + Supabase als Datenbank.
 
-- Website: https://fuez0.github.io/honig/
-- Verwaltung: https://fuez0.github.io/honig/admin.html
-- honig.x10.mx leitet weiter (Datei `x10-weiterleitung.html` als index.html einmalig dort in `public_html` hochladen)
-
-## Aufbau
-- `index.html`, `status.html`, `impressum.html`, `datenschutz.html` – öffentliche Seiten
-- `admin.html` + `admin.js` – Verwaltung (Reservierungen, Abholliste, Produkte, Einstellungen, Benutzer)
-- `config.js` – Supabase-URL + öffentlicher Schlüssel (Schutz über Row Level Security)
-- `nachtrag-loeschen.sql` – SQL-Nachtrag
-
-Jeder Push auf `main` wird von GitHub Pages automatisch veröffentlicht.
+- Website: https://honig.x10.mx/
+- Verwaltung: https://honig.x10.mx/admin.html
+- Hosting: x10hosting, Ordner `domains/honig.x10.mx/public_html` (alle Dateien aus diesem Ordner inkl. `.htaccess`)
+- GitHub (fuez0/honig) dient als Sicherung; fuez0.github.io/honig leitet automatisch auf honig.x10.mx um (Code oben in common.js).
