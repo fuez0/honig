@@ -15,6 +15,12 @@ RewriteRule ^ https://honig.x10.mx%{REQUEST_URI} [R=301,L]
 <FilesMatch "(sw\.js|\.html)$">
 Header set Cache-Control "no-cache"
 </FilesMatch>
+<FilesMatch "^(index|impressum|datenschutz)\.html$">
+Header set X-Robots-Tag "index, follow"
+</FilesMatch>
+<FilesMatch "^(admin|status|x10-weiterleitung)\.html$">
+Header set X-Robots-Tag "noindex, follow"
+</FilesMatch>
 <FilesMatch "\.(sql|md)$">
 Require all denied
 </FilesMatch>
