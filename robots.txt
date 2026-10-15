@@ -2,5 +2,6 @@ User-agent: *
 Disallow: /admin.html
 Disallow: /status.html
 Disallow: /x10-weiterleitung.html
+Disallow: /statistik/
 
 Sitemap: https://honig.x10.mx/sitemap.xml
