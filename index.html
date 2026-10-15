@@ -33,7 +33,7 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
 </script>
 </head>
 <body>
-<div id="site-header"><header class="topbar"><div class="wrap topbar-in"><a class="brand" href="./"><img src="favicon.svg" alt="Logo der Imkerei Josef Filz" width="34" height="34"><span>Imkerei Josef Filz</span></a></div></header></div>
+<div id="site-header"><header class="topbar"><div class="wrap topbar-in"><a class="brand" href="./"><img src="favicon.svg" alt="Logo der Imkerei Josef Filz" width="34" height="34"><span>Imkerei Josef Filz</span></a><div class="nav-wrap"><nav class="nav" id="mainnav" aria-label="Hauptmenü"><a href="./#produkte">Produkte</a><a href="./#sorten">Sorten</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a><a href="./#faq">FAQ</a><a href="status.html">Meine Reservierung</a></nav><a class="btn btn-small nav-cta" href="./#reservieren">Reservieren</a></div></div></header></div>
 
 <section class="hero" id="hero">
   <div class="wrap hero-in">
@@ -85,7 +85,7 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
         <label id="timewrap">Uhrzeit<select name="wish_time"><option value="">Bitte zuerst Wunschtermin wählen</option></select></label>
         <label>Anmerkung<textarea name="note" rows="3" maxlength="1000" placeholder="z. B. bringe leere Gläser mit"></textarea></label>
         <div class="hp" aria-hidden="true"><label>Firma<input type="text" name="firma" tabindex="-1" autocomplete="off"></label></div>
-        <label class="check"><input type="checkbox" name="dsgvo" value="1" required> <span>Ich bin einverstanden, dass meine Angaben zur Abwicklung der Reservierung gespeichert werden (<a href="datenschutz.html" target="_blank">Datenschutz</a>). *</span></label>
+        <label class="check"><input type="checkbox" name="dsgvo" value="1" required> <span>Ich bin einverstanden, dass meine Angaben zur Abwicklung der Reservierung gespeichert werden (<a href="datenschutz.html" target="_blank">Datenschutzerklärung</a>). *</span></label>
       </div>
     </div>
     <aside class="panel summary">
@@ -123,7 +123,7 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
 <section id="sorten" class="section section-alt">
   <div class="wrap">
     <h2>Unsere Honigsorten im Überblick</h2>
-    <p class="intro">Jeder Honig schmeckt ein bisschen anders – je nachdem, wo die Bienen gesammelt haben und wie das Bienenjahr verlaufen ist. Hier findest du einen kurzen Überblick über die Sorten, die du bei uns in Bad Schönau ab Hof bekommst.</p>
+    <p class="intro">Jeder Honig schmeckt ein bisschen anders – je nachdem, wo die Bienen gesammelt haben und wie das Bienenjahr verlaufen ist. Hier findest du einen kurzen Überblick über die Sorten, die du bei uns in Bad Schönau <a href="./#abholung">direkt ab Hof abholen</a> kannst. Welche Gläser gerade vorrätig sind, siehst du <a href="./#produkte">in unserer aktuellen Honig-Auswahl</a>.</p>
     <div class="sorten">
       <article class="sorte"><h3>Blütenhonig – mild und hell</h3><p>Entsteht aus dem Nektar vieler verschiedener Blüten von Wiesen, Obstbäumen und Feldrainen. Er ist hell, mild und angenehm süß. Blütenhonig wird meist nach einiger Zeit fest – das ist ganz natürlich und ein Zeichen für naturbelassenen Honig. Perfekt aufs Frühstücksbrot, ins Müsli oder zum Süßen von Tee und Gebäck. Erhältlich im 500-g- und im 250-g-Glas.</p></article>
       <article class="sorte"><h3>Waldhonig – kräftig und würzig</h3><p>Die Bienen sammeln dafür vor allem Honigtau von Nadel- und Laubbäumen. Waldhonig ist dunkler, kräftig-würzig und weniger süß als Blütenhonig. Er bleibt meist lange flüssig und passt wunderbar zu Käse, Joghurt, dunklem Brot oder in Marinaden und Salatdressings.</p></article>
@@ -137,7 +137,7 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
       </div>
       <div>
         <h3>So bleibt dein Honig lange gut</h3>
-        <p>Bewahre Honig gut verschlossen, kühl, trocken und dunkel auf, zum Beispiel in der Speisekammer – in den Kühlschrank muss er nicht. Honig nimmt leicht Feuchtigkeit und Gerüche auf, deshalb das Glas immer gleich wieder zuschrauben und einen sauberen, trockenen Löffel verwenden.</p>
+        <p>Bewahre Honig gut verschlossen, kühl, trocken und dunkel auf, zum Beispiel in der Speisekammer – in den Kühlschrank muss er nicht. Mehr dazu findest du auch in den <a href="./#faq">Antworten auf häufige Fragen</a>. Honig nimmt leicht Feuchtigkeit und Gerüche auf, deshalb das Glas immer gleich wieder zuschrauben und einen sauberen, trockenen Löffel verwenden.</p>
       </div>
     </div>
   </div>
@@ -153,11 +153,11 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
   </div>
 </section>
 
-<section class="section">
+<section id="faq" class="section">
   <div class="wrap faq">
     <h2>Häufige Fragen</h2>
-    <details><summary>Ist die Reservierung verbindlich?</summary><p>Erst wenn wir den Termin bestätigt haben, liegt dein Honig für dich bereit. Falls du doch nicht kommen kannst, storniere bitte kurz über „Meine Reservierung“ oder ruf uns an.</p></details>
-    <details><summary>Kann ich auch ohne Reservierung vorbeikommen?</summary><p>Gerne während der Abholzeiten – solange der Vorrat reicht. Mit Reservierung ist dein Honig aber sicher.</p></details>
+    <details><summary>Ist die Reservierung verbindlich?</summary><p>Erst wenn wir den Termin bestätigt haben, liegt dein Honig für dich bereit. Falls du doch nicht kommen kannst, kannst du <a href="status.html">deine Reservierung online stornieren</a> oder uns anrufen.</p></details>
+    <details><summary>Kann ich auch ohne Reservierung vorbeikommen?</summary><p>Gerne während der Abholzeiten – solange der Vorrat reicht. Mit einer <a href="./#reservieren">kostenlosen Online-Reservierung</a> ist dein Honig aber sicher.</p></details>
     <details><summary>Warum wird Honig fest?</summary><p>Das Kristallisieren ist ein natürlicher Vorgang und ein Qualitätsmerkmal. Im warmen Wasserbad (max. 40 °C) wird er wieder flüssig.</p></details>
     <details><summary>Darf ich Honig erhitzen?</summary><p>Am besten nicht über 40 °C. Bei höheren Temperaturen gehen wertvolle Inhaltsstoffe wie Enzyme verloren. Gib Honig deshalb erst in den Tee, wenn dieser etwas abgekühlt ist.</p></details>
     <details><summary>Dürfen Babys Honig essen?</summary><p>Nein – Honig ist für Kinder unter einem Jahr nicht geeignet, weil ihre Darmflora noch nicht vollständig entwickelt ist. Ab dem ersten Geburtstag spricht nichts dagegen.</p></details>
@@ -165,11 +165,11 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
     <details><summary>Wie lange ist Honig haltbar?</summary><p>Kühl, trocken und dunkel gelagert hält Honig viele Jahre. Das Mindesthaltbarkeitsdatum steht auf dem Glas.</p></details>
   </div>
 </section>
-<div id="site-footer"><footer class="footer"><div class="wrap footer-grid"><div><strong>Imkerei Josef Filz</strong><br>2853 Bad Schönau</div><div><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a></div></div><div class="wrap small muted">© 2026 Imkerei Josef Filz</div></footer></div>
+<div id="site-footer"><footer class="footer"><div class="wrap footer-grid"><div><strong>Imkerei Josef Filz</strong><br>2853 Bad Schönau</div><div><strong>Schnellzugriff</strong><br><a href="./#reservieren">Honig online reservieren</a><br><a href="./#sorten">Unsere Honigsorten</a><br><a href="./#abholung">Abholzeiten &amp; Adresse</a><br><a href="./#faq">Häufige Fragen zum Honig</a><br><a href="status.html">Reservierung ansehen oder stornieren</a></div><div><strong>Rechtliches</strong><br><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a></div></div><div class="wrap small muted">© 2026 Imkerei Josef Filz</div></footer></div>
 
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=11"></script>
+<script src="common.js?v=12"></script>
 <script src="shop.js?v=10"></script>
 </body>
 </html>

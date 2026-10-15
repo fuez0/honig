@@ -91,9 +91,9 @@ if (location.hostname === 'fuez0.github.io') {
     var banner = (st.banner || '').trim() ? '<div class="banner">' + esc(st.banner) + '</div>' : '';
     return banner + '<header class="topbar"><div class="wrap topbar-in">' +
       '<a class="brand" href="./"><img src="favicon.svg" alt="Logo ' + esc(st.hof_name) + '" width="34" height="34"><span>' + esc(st.hof_name) + '</span></a>' +
-      '<div class="nav-wrap"><nav class="nav" id="mainnav" aria-label="Hauptmenü"><a href="./#produkte">Produkte</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a>' +
-      '<a href="status.html">Meine Reservierung</a></nav>' +
-      '<a class="btn btn-small nav-cta" href="./#produkte">Reservieren</a>' +
+      '<div class="nav-wrap"><nav class="nav" id="mainnav" aria-label="Hauptmenü"><a href="./#produkte">Produkte</a><a href="./#sorten">Sorten</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a>' +
+      '<a href="./#faq">FAQ</a><a href="status.html">Meine Reservierung</a></nav>' +
+      '<a class="btn btn-small nav-cta" href="./#reservieren">Reservieren</a>' +
       '<button type="button" class="menu-btn" aria-expanded="false" aria-controls="mainnav" aria-label="Menü öffnen"><span></span><span></span><span></span></button></div>' +
       '</div></header>';
   }
@@ -104,7 +104,8 @@ if (location.hostname === 'fuez0.github.io') {
       '<br><a href="' + esc(mapsUrl(st)) + '" target="_blank" rel="noopener">Route planen ↗</a></div>' +
       '<div>' + (st.telefon ? 'Tel.: <a href="tel:' + esc(phoneIntl(st.telefon)) + '">' + esc(st.telefon) + '</a><br>' : '') +
       (st.email ? 'E-Mail: <a href="mailto:' + esc(st.email) + '">' + esc(st.email) + '</a><br>' : '') + wa + '</div>' +
-      '<div><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a><br><a href="admin.html">Verwaltung</a></div>' +
+      '<div><strong>Schnellzugriff</strong><br><a href="./#reservieren">Honig online reservieren</a><br><a href="./#sorten">Unsere Honigsorten</a><br><a href="./#abholung">Abholzeiten &amp; Adresse</a><br><a href="./#faq">Häufige Fragen zum Honig</a><br><a href="status.html">Reservierung ansehen oder stornieren</a></div>' +
+      '<div><strong>Rechtliches</strong><br><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a><br><a href="admin.html">Verwaltung</a></div>' +
       '</div><div class="wrap small muted">Alle Produkte nur zur Selbstabholung ab Hof – kein Versand. © ' + new Date().getFullYear() + ' ' + esc(st.hof_name) + '</div></footer>';
   }
   function applyChrome(st, title) {
