@@ -1,5 +1,5 @@
 # Honig-Website auf honig.x10.mx
-DirectoryIndex index.html
+DirectoryIndex index.html index.php
 Options -Indexes
 
 <IfModule mod_rewrite.c>
