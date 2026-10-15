@@ -90,7 +90,7 @@ if (location.hostname === 'fuez0.github.io') {
   function header(st) {
     var banner = (st.banner || '').trim() ? '<div class="banner">' + esc(st.banner) + '</div>' : '';
     return banner + '<header class="topbar"><div class="wrap topbar-in">' +
-      '<a class="brand" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>' + esc(st.hof_name) + '</span></a>' +
+      '<a class="brand" href="./"><img src="favicon.svg" alt="Logo ' + esc(st.hof_name) + '" width="34" height="34"><span>' + esc(st.hof_name) + '</span></a>' +
       '<div class="nav-wrap"><nav class="nav" id="mainnav" aria-label="Hauptmenü"><a href="./#produkte">Produkte</a><a href="./#abholung">Abholung</a><a href="./#ueber-uns">Über uns</a>' +
       '<a href="status.html">Meine Reservierung</a></nav>' +
       '<a class="btn btn-small nav-cta" href="./#produkte">Reservieren</a>' +

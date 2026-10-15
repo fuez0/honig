@@ -313,3 +313,7 @@ body.has-cartbar #produkte{padding-bottom:110px}
 .sorte h3{margin-bottom:.4em}.sorte p{margin:0}
 #sorten .intro{max-width:760px}
 .tipps{align-items:start}.tipps p{margin-top:0}
+
+/* SEO-Runde 8 */
+.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.card h3 .unit{display:block;font-family:var(--sans);font-weight:400}

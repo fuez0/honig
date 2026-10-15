@@ -46,8 +46,8 @@
       '<input type="number" value="0" min="0" max="' + max + '" inputmode="numeric" aria-label="Menge ' + esc(full) + '">' +
       '<button type="button" class="qplus" aria-label="' + esc(full) + ' – Menge erhöhen">+</button></div>' : '');
     return '<article class="card' + (sold ? ' soldout' : '') + '">' +
-      '<div class="card-img"><img src="' + esc(H.imgSrc(p.image_url)) + '" alt="' + esc(p.name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'glas.svg\'"></div>' +
-      '<div class="card-body"><h3>' + esc(p.name) + '</h3><p class="unit">' + esc(p.unit) + '</p><p class="desc">' + H.nl(p.description) + '</p>' +
+      '<div class="card-img"><img src="' + esc(H.imgSrc(p.image_url)) + '" alt="' + esc(full) + '" loading="lazy" onerror="this.onerror=null;this.src=\'glas.svg\'"></div>' +
+      '<div class="card-body"><h3>' + esc(p.name) + (p.unit ? ' <span class="unit">' + esc(p.unit) + '</span>' : '') + '</h3><p class="desc">' + H.nl(p.description) + '</p>' +
       '<div class="card-foot"><span class="price">' + H.euro(p.price_cents) + '</span>' + ctrl + '</div>' +
       (!sold && stock !== null && stock <= 5 ? '<p class="low">Nur noch ' + stock + ' verfügbar</p>' : '') +
       '</div></article>';
