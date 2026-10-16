@@ -72,6 +72,57 @@
     if (days.length) txt += ' Abholung möglich: ' + days.map(function (x) { return H.WEEKDAYS[x]; }).join(', ') + '.';
     document.getElementById('dayhint').textContent = txt;
   })();
+
+  // ---------- Eigener Kalender (große Felder statt winziger Browser-Datumsauswahl) ----------
+  var cal = document.getElementById('cal');
+  var MON = ['Jänner','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymdOf(y, m, dd) { return y + '-' + pad(m + 1) + '-' + pad(dd); }
+  function okDay(v) { return v >= d.min && v <= d.max && (!days.length || days.indexOf(H.isoWeekday(v)) !== -1); }
+  var calY = +d.min.slice(0, 4), calM = +d.min.slice(5, 7) - 1, focusV = null;
+  function firstOk() { for (var t = new Date(d.min + 'T12:00:00'); ; t.setDate(t.getDate() + 1)) { var v = ymdOf(t.getFullYear(), t.getMonth(), t.getDate()); if (v > d.max) return null; if (okDay(v)) return v; } }
+  function renderCal() {
+    var first = new Date(calY, calM, 1, 12), lead = (first.getDay() + 6) % 7, nDays = new Date(calY, calM + 1, 0, 12).getDate();
+    var minM = d.min.slice(0, 7), maxM = d.max.slice(0, 7), curM = calY + '-' + pad(calM + 1);
+    var tabV = focusV || (d.value && d.value.slice(0, 7) === curM ? d.value : null);
+    if (!tabV || tabV.slice(0, 7) !== curM) { tabV = null; for (var i = 1; i <= nDays; i++) { if (okDay(ymdOf(calY, calM, i))) { tabV = ymdOf(calY, calM, i); break; } } }
+    var h = '<div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" aria-label="Voriger Monat"' + (curM <= minM ? ' disabled' : '') + '>‹</button>' +
+      '<strong aria-live="polite">' + MON[calM] + ' ' + calY + '</strong>' +
+      '<button type="button" class="cal-nav" data-nav="1" aria-label="Nächster Monat"' + (curM >= maxM ? ' disabled' : '') + '>›</button></div>' +
+      '<div class="cal-grid" role="grid">' + ['Mo','Di','Mi','Do','Fr','Sa','So'].map(function (w) { return '<span class="cal-wd" aria-hidden="true">' + w + '</span>'; }).join('');
+    for (var k = 0; k < lead; k++) h += '<span></span>';
+    for (var dd = 1; dd <= nDays; dd++) {
+      var v = ymdOf(calY, calM, dd), ok = okDay(v), sel = v === d.value;
+      h += '<button type="button" class="cal-day' + (sel ? ' sel' : '') + '" data-v="' + v + '"' + (ok ? '' : ' disabled') +
+        ' tabindex="' + (v === tabV ? '0' : '-1') + '" aria-pressed="' + sel + '" aria-label="' + H.dateDe(v) + (ok ? '' : ' – nicht verfügbar') + '">' + dd + '</button>';
+    }
+    h += '</div><p class="cal-sel">' + (d.value ? 'Gewählt: <strong>' + H.dateDe(d.value) + '</strong>' : 'Bitte einen Tag antippen.') + '</p>';
+    cal.innerHTML = h;
+  }
+  function pick(v) {
+    d.value = v; focusV = v; renderCal();
+    d.dispatchEvent(new Event('change'));
+    var b = cal.querySelector('[data-v="' + v + '"]'); if (b) b.focus();
+  }
+  cal.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.nav) { calM += +b.dataset.nav; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; } focusV = null; renderCal(); return; }
+    pick(b.dataset.v);
+  });
+  cal.addEventListener('keydown', function (e) {
+    var b = e.target.closest('.cal-day'); if (!b) return;
+    var step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key]; if (!step) return;
+    e.preventDefault();
+    var t = new Date(b.dataset.v + 'T12:00:00');
+    for (var n = 0; n < 62; n++) {
+      t.setDate(t.getDate() + step);
+      var v = ymdOf(t.getFullYear(), t.getMonth(), t.getDate());
+      if (v < d.min || v > d.max) return;
+      if (okDay(v)) { focusV = v; calY = t.getFullYear(); calM = t.getMonth(); renderCal(); cal.querySelector('[data-v="' + v + '"]').focus(); return; }
+    }
+  });
+  (function () { var f = firstOk(); if (f) { calY = +f.slice(0, 4); calM = +f.slice(5, 7) - 1; } })();
+  renderCal();
   var VB = 'nach Vereinbarung';
   var hasSlots = H.slots(st).length > 0;
   var timeHint = document.createElement('p'); timeHint.className = 'hint'; timeHint.id = 'timehint';
@@ -180,12 +231,14 @@
     if (el === grid) return grid;
     if (el.type === 'checkbox') return el.closest('label');
     if (el.name === 'phone' || el.name === 'email') return form.querySelector('.hint');
+    if (el === d) return cal;
     return el.closest('label') || el;
   }
   function clearErr(el) {
     var old = document.getElementById(errId(el)); if (old) old.remove();
     el.removeAttribute('aria-invalid');
     if (el === grid) grid.classList.remove('invalid');
+    if (el === d) cal.classList.remove('invalid');
     if (el.type === 'checkbox') el.closest('label').classList.remove('invalid');
     if (el.name === 'phone' || el.name === 'email') { form.phone.removeAttribute('aria-invalid'); form.email.removeAttribute('aria-invalid'); }
   }
@@ -194,6 +247,7 @@
     var p = document.createElement('p');
     p.className = 'ferr'; p.id = errId(el); p.setAttribute('role', 'alert'); p.textContent = msg;
     if (el === grid) { grid.classList.add('invalid'); grid.insertAdjacentElement('beforebegin', p); }
+    else if (el === d) { cal.classList.add('invalid'); cal.insertAdjacentElement('afterend', p); }
     else {
       anchorOf(el).insertAdjacentElement('afterend', p);
       el.setAttribute('aria-invalid', 'true');
@@ -208,7 +262,7 @@
     var g = document.getElementById('err-general'); if (g) g.remove();
   }
   function focusFirst(el) {
-    var target = el === grid ? (grid.querySelector('.qty input') || grid) : el;
+    var target = el === grid ? (grid.querySelector('.qty input') || grid) : el === d ? (cal.querySelector('.cal-day[tabindex="0"]') || cal) : el;
     (el === grid ? grid : anchorOf(el)).scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { try { target.focus({ preventScroll: true }); } catch (e) {} }, 350);
   }
