@@ -28,10 +28,11 @@
   }
 
   // ---------- Passwort-Regeln ----------
-  var PW_HINT = 'Mindestens 8 Zeichen, davon mindestens ein Großbuchstabe, eine Zahl und ein Sonderzeichen.';
+  var PW_HINT = 'Mindestens 8 Zeichen, davon mindestens ein Großbuchstabe, ein Kleinbuchstabe, eine Zahl und ein Sonderzeichen.';
   function pwFehler(pw, pw2) {
     if (pw.length < 8) return 'Das Passwort muss mindestens 8 Zeichen lang sein.';
     if (!/[A-ZÄÖÜ]/.test(pw)) return 'Das Passwort braucht mindestens einen Großbuchstaben.';
+    if (!/[a-zäöüß]/.test(pw)) return 'Das Passwort braucht mindestens einen Kleinbuchstaben.';
     if (!/[0-9]/.test(pw)) return 'Das Passwort braucht mindestens eine Zahl.';
     if (!/[^A-Za-zÄÖÜäöüß0-9\s]/.test(pw)) return 'Das Passwort braucht mindestens ein Sonderzeichen (z. B. ! ? # $ % & * -).';
     if (pw !== pw2) return 'Die beiden Passwörter stimmen nicht überein.';
