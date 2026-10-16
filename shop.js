@@ -74,7 +74,16 @@
   })();
 
   // ---------- Eigener Kalender (große Felder statt winziger Browser-Datumsauswahl) ----------
-  var cal = document.getElementById('cal');
+  var cal = document.getElementById('cal'), dbtn = document.getElementById('date-btn'), dtxt = document.getElementById('date-btn-txt');
+  function openCal() {
+    if (d.value) { calY = +d.value.slice(0, 4); calM = +d.value.slice(5, 7) - 1; }
+    focusV = null; renderCal(); cal.hidden = false; dbtn.setAttribute('aria-expanded', 'true');
+    var b = cal.querySelector('.cal-day[tabindex="0"]'); if (b) b.focus();
+  }
+  function closeCal(back) { cal.hidden = true; dbtn.setAttribute('aria-expanded', 'false'); if (back) dbtn.focus(); }
+  dbtn.addEventListener('click', function () { cal.hidden ? openCal() : closeCal(); });
+  document.addEventListener('click', function (e) { if (!cal.hidden && !cal.contains(e.target) && !dbtn.contains(e.target)) closeCal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !cal.hidden) closeCal(true); });
   var MON = ['Jänner','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function ymdOf(y, m, dd) { return y + '-' + pad(m + 1) + '-' + pad(dd); }
@@ -96,13 +105,14 @@
       h += '<button type="button" class="cal-day' + (sel ? ' sel' : '') + '" data-v="' + v + '"' + (ok ? '' : ' disabled') +
         ' tabindex="' + (v === tabV ? '0' : '-1') + '" aria-pressed="' + sel + '" aria-label="' + H.dateDe(v) + (ok ? '' : ' – nicht verfügbar') + '">' + dd + '</button>';
     }
-    h += '</div><p class="cal-sel">' + (d.value ? 'Gewählt: <strong>' + H.dateDe(d.value) + '</strong>' : 'Bitte einen Tag antippen.') + '</p>';
+    h += '</div>';
     cal.innerHTML = h;
   }
   function pick(v) {
-    d.value = v; focusV = v; renderCal();
+    d.value = v; focusV = v;
+    dtxt.textContent = H.dateDe(v); dtxt.classList.remove('ph');
+    closeCal(true);
     d.dispatchEvent(new Event('change'));
-    var b = cal.querySelector('[data-v="' + v + '"]'); if (b) b.focus();
   }
   cal.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b || b.disabled) return;
@@ -231,14 +241,14 @@
     if (el === grid) return grid;
     if (el.type === 'checkbox') return el.closest('label');
     if (el.name === 'phone' || el.name === 'email') return form.querySelector('.hint');
-    if (el === d) return cal;
+    if (el === d) return dbtn;
     return el.closest('label') || el;
   }
   function clearErr(el) {
     var old = document.getElementById(errId(el)); if (old) old.remove();
     el.removeAttribute('aria-invalid');
     if (el === grid) grid.classList.remove('invalid');
-    if (el === d) cal.classList.remove('invalid');
+    if (el === d) dbtn.classList.remove('invalid');
     if (el.type === 'checkbox') el.closest('label').classList.remove('invalid');
     if (el.name === 'phone' || el.name === 'email') { form.phone.removeAttribute('aria-invalid'); form.email.removeAttribute('aria-invalid'); }
   }
@@ -247,7 +257,7 @@
     var p = document.createElement('p');
     p.className = 'ferr'; p.id = errId(el); p.setAttribute('role', 'alert'); p.textContent = msg;
     if (el === grid) { grid.classList.add('invalid'); grid.insertAdjacentElement('beforebegin', p); }
-    else if (el === d) { cal.classList.add('invalid'); cal.insertAdjacentElement('afterend', p); }
+    else if (el === d) { dbtn.classList.add('invalid'); cal.insertAdjacentElement('afterend', p); }
     else {
       anchorOf(el).insertAdjacentElement('afterend', p);
       el.setAttribute('aria-invalid', 'true');
@@ -262,7 +272,7 @@
     var g = document.getElementById('err-general'); if (g) g.remove();
   }
   function focusFirst(el) {
-    var target = el === grid ? (grid.querySelector('.qty input') || grid) : el === d ? (cal.querySelector('.cal-day[tabindex="0"]') || cal) : el;
+    var target = el === grid ? (grid.querySelector('.qty input') || grid) : el === d ? dbtn : el;
     (el === grid ? grid : anchorOf(el)).scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { try { target.focus({ preventScroll: true }); } catch (e) {} }, 350);
   }

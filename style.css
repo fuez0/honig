@@ -337,3 +337,13 @@ body.has-cartbar #produkte{padding-bottom:110px}
 .cal-day.sel{background:var(--honey-d);color:#fff}
 .cal-sel{margin:10px 0 0;font-size:.95rem}
 @media (max-width:420px){.cal{padding:8px}.cal-day{height:42px;font-size:1rem}}
+
+/* Datum: Feld mit aufklappendem Kalender */
+.datefield{position:relative}
+.date-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font:inherit;font-weight:500;padding:.65em .8em;border:1.5px solid var(--line);border-radius:10px;background:#fffdf8;color:var(--ink);cursor:pointer}
+.date-btn .ph{color:var(--muted);font-weight:400}
+.date-btn .date-ico{color:var(--honey-d);flex:none}
+.date-btn:focus-visible,.date-btn[aria-expanded="true"]{outline:none;border-color:var(--honey);box-shadow:0 0 0 3px rgba(217,142,4,.18)}
+.date-btn.invalid{border-color:var(--err);background:#fff8f7}
+.datefield .cal{position:absolute;z-index:30;top:calc(100% + 6px);left:0;width:min(420px,100%);box-shadow:0 12px 32px rgba(60,40,10,.18);background:#fffdf8}
+.datefield .cal[hidden]{display:none}
