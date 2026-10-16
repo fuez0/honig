@@ -27,6 +27,17 @@
     d.hidden = !r.count; d.textContent = r.count || '';
   }
 
+  // ---------- Passwort-Regeln ----------
+  var PW_HINT = 'Mindestens 8 Zeichen, davon mindestens ein Großbuchstabe, eine Zahl und ein Sonderzeichen.';
+  function pwFehler(pw, pw2) {
+    if (pw.length < 8) return 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+    if (!/[A-ZÄÖÜ]/.test(pw)) return 'Das Passwort braucht mindestens einen Großbuchstaben.';
+    if (!/[0-9]/.test(pw)) return 'Das Passwort braucht mindestens eine Zahl.';
+    if (!/[^A-Za-zÄÖÜäöüß0-9\s]/.test(pw)) return 'Das Passwort braucht mindestens ein Sonderzeichen (z. B. ! ? # $ % & * -).';
+    if (pw !== pw2) return 'Die beiden Passwörter stimmen nicht überein.';
+    return '';
+  }
+
   // ---------- Anmeldung ----------
   function loginView(msg) {
     document.getElementById('abar').hidden = true;
@@ -37,7 +48,9 @@
       '<details style="margin-top:16px"><summary>Noch kein Konto? Registrieren</summary>' +
       '<form id="rf" class="fields" style="margin-top:10px"><p class="small muted">Das erste Konto wird automatisch freigeschaltet. Weitere Konten (z. B. Papa) müssen danach unter „Benutzer“ freigegeben werden.</p>' +
       '<label>Name<input name="name" required></label><label>E-Mail<input type="email" name="email" required></label>' +
-      '<label>Passwort (mind. 8 Zeichen)<input type="password" name="pw" minlength="8" required autocomplete="new-password"></label>' +
+      '<label>Passwort<input type="password" name="pw" minlength="8" required autocomplete="new-password"></label>' +
+      '<label>Passwort wiederholen<input type="password" name="pw2" minlength="8" required autocomplete="new-password"></label>' +
+      '<p class="small muted">' + PW_HINT + '</p><div class="flash flash-err" id="rferr" hidden></div>' +
       '<button class="btn btn-green">Konto anlegen</button></form></details>' +
       '<details style="margin-top:10px"><summary>Passwort vergessen?</summary><form id="ff" class="fields" style="margin-top:10px">' +
       '<label>E-Mail<input type="email" name="email" required></label><button class="btn btn-grey btn-small">Link zum Zurücksetzen senden</button></form></details>' +
@@ -50,6 +63,10 @@
     };
     document.getElementById('rf').onsubmit = async function (e) {
       e.preventDefault();
+      var fe = document.getElementById('rferr');
+      var pe = pwFehler(this.pw.value, this.pw2.value);
+      if (pe) { fe.textContent = pe; fe.hidden = false; return; }
+      fe.hidden = true;
       var r = await sb.auth.signUp({ email: this.email.value.trim(), password: this.pw.value,
         options: { data: { name: this.name.value.trim() }, emailRedirectTo: location.href.replace(/#.*$/, '') } });
       if (r.error) return loginView('Registrierung fehlgeschlagen: ' + r.error.message);
@@ -489,7 +506,7 @@
       '<div class="agrid" style="margin-top:20px"><div class="panel"><h3>Neue Person hinzufügen</h3><p>So bekommt z. B. Papa Zugang:</p><ol>' +
       '<li>Er öffnet <strong>' + esc(location.href.replace(/#.*$/, '')) + '</strong></li><li>„Noch kein Konto? Registrieren“ → Name, E-Mail, Passwort</li>' +
       '<li>Bestätigungslink in seiner E-Mail anklicken</li><li>Du klickst hier bei ihm auf <strong>Freigeben</strong></li></ol></div>' +
-      '<form class="panel fields" id="pwf"><h3>Eigenes Passwort ändern</h3><label>Neues Passwort (mind. 8 Zeichen)<input type="password" name="pw" minlength="8" required autocomplete="new-password"></label>' +
+      '<form class="panel fields" id="pwf"><h3>Eigenes Passwort ändern</h3><p class="small muted">' + PW_HINT + '</p><label>Neues Passwort<input type="password" name="pw" minlength="8" required autocomplete="new-password"></label>' +
       '<label>Wiederholen<input type="password" name="pw2" minlength="8" required autocomplete="new-password"></label><button class="btn">Ändern</button></form>' +
       '<div class="panel" id="pushbox"></div></div>';
     if (window.HonigPush) HonigPush.box(document.getElementById('pushbox'));
@@ -510,7 +527,8 @@
     });
     document.getElementById('pwf').onsubmit = async function (e) {
       e.preventDefault();
-      if (this.pw.value !== this.pw2.value) return flash('Die Passwörter stimmen nicht überein.', 'err');
+      var pe = pwFehler(this.pw.value, this.pw2.value);
+      if (pe) return flash(pe, 'err');
       var x = await sb.auth.updateUser({ password: this.pw.value });
       x.error ? err(x.error) : (this.reset(), flash('Passwort geändert.'));
     };
