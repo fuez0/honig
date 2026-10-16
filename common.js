@@ -1,8 +1,11 @@
 /* Gemeinsame Funktionen für Website und Verwaltung */
-// Alte GitHub-Adresse → eigene Domain
-if (location.hostname === 'fuez0.github.io') {
-  location.replace('https://honig.x10.mx' + location.pathname.replace(/^\/honig/, '') + location.search + location.hash);
-}
+// Alte Adressen (GitHub, x10, pages.dev, www) → https://honig-filz.at
+(function () {
+  var h = location.hostname;
+  if (h === 'fuez0.github.io' || h === 'honig.x10.mx' || h === 'honig-filz.pages.dev' || h === 'www.honig-filz.at') {
+    location.replace('https://honig-filz.at' + location.pathname.replace(/^\/honig(?=\/|$)/, '') + location.search + location.hash);
+  }
+})();
 (function () {
   var cfg = window.HONIG_CONFIG;
   var sb = window.supabase.createClient(cfg.url, cfg.key, {

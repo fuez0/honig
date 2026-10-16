@@ -4,4 +4,4 @@ Disallow: /status.html
 Disallow: /x10-weiterleitung.html
 Disallow: /statistik/
 
-Sitemap: https://honig.x10.mx/sitemap.xml
+Sitemap: https://honig-filz.at/sitemap.xml
