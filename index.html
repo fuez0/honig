@@ -23,7 +23,7 @@
 <meta name="theme-color" content="#9a5c05">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
 <!-- Matomo (ohne Cookies) -->
 <script>
 var _paq=window._paq=window._paq||[];
@@ -163,11 +163,43 @@ var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0]
     <details><summary>Wie lange ist Honig haltbar?</summary><p>Kühl, trocken und dunkel gelagert hält Honig viele Jahre. Das Mindesthaltbarkeitsdatum steht auf dem Glas.</p></details>
   </div>
 </section>
-<div id="site-footer"><footer class="footer"><div class="wrap footer-grid"><div><strong>Imkerei Josef Filz</strong><br>2853 Bad Schönau</div><div><strong>Schnellzugriff</strong><br><a href="./#reservieren">Honig online reservieren</a><br><a href="./#sorten">Unsere Honigsorten</a><br><a href="./#abholung">Abholzeiten &amp; Adresse</a><br><a href="./#faq">Häufige Fragen zum Honig</a><br><a href="status.html">Reservierung ansehen oder stornieren</a></div><div><strong>Rechtliches</strong><br><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a></div></div><div class="wrap footer-verband" style="margin-bottom:14px">Imkerverband in der Region: <a href="https://www.kirchschlag-bw.gv.at/NOe_Imkerverband_-_Ortsgruppe_Kirchschlag" target="_blank" rel="noopener">NÖ Imkerverband – Ortsgruppe Kirchschlag ↗</a></div><div class="wrap small muted">© 2026 Imkerei Josef Filz</div></footer></div>
+<section id="teilen" class="section share-sec" aria-labelledby="teilen-h">
+  <div class="wrap share">
+    <div>
+      <h2 id="teilen-h">Empfiehl uns weiter</h2>
+      <p class="muted">Du magst unseren Honig? Teile die Seite mit Familie, Freunden und Nachbarn.</p>
+    </div>
+    <div class="share-btns">
+      <a class="share-btn" href="https://wa.me/?text=Echter%20Honig%20ab%20Hof%20aus%20Bad%20Sch%C3%B6nau%20%E2%80%93%20Imkerei%20Josef%20Filz.%20Online%20reservieren%20und%20abholen%3A%20https%3A//honig-filz.at/" target="_blank" rel="noopener" aria-label="Per WhatsApp teilen">WhatsApp</a>
+      <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fhonig-filz.at%2F" target="_blank" rel="noopener" aria-label="Auf Facebook teilen">Facebook</a>
+      <a class="share-btn" href="https://x.com/intent/post?text=Echter%20Honig%20ab%20Hof%20aus%20Bad%20Sch%C3%B6nau%20%E2%80%93%20Imkerei%20Josef%20Filz.%20Online%20reservieren%20und%20abholen%3A&amp;url=https%3A%2F%2Fhonig-filz.at%2F" target="_blank" rel="noopener" aria-label="Auf X teilen">X</a>
+      <a class="share-btn" href="https://t.me/share/url?url=https%3A%2F%2Fhonig-filz.at%2F&amp;text=Echter%20Honig%20ab%20Hof%20aus%20Bad%20Sch%C3%B6nau%20%E2%80%93%20Imkerei%20Josef%20Filz.%20Online%20reservieren%20und%20abholen%3A" target="_blank" rel="noopener" aria-label="Per Telegram teilen">Telegram</a>
+      <a class="share-btn" href="mailto:?subject=Honig%20ab%20Hof%20%E2%80%93%20Imkerei%20Josef%20Filz&amp;body=Echter%20Honig%20ab%20Hof%20aus%20Bad%20Sch%C3%B6nau%20%E2%80%93%20Imkerei%20Josef%20Filz.%20Online%20reservieren%20und%20abholen%3A%20https%3A//honig-filz.at/" aria-label="Per E-Mail teilen">E-Mail</a>
+      <button type="button" class="share-btn" id="share-native" hidden>Teilen …</button>
+      <button type="button" class="share-btn" id="share-copy">Link kopieren</button>
+    </div>
+    <p class="small muted share-ok" id="share-ok" role="status" aria-live="polite"></p>
+  </div>
+</section>
+<script>
+(function () {
+  var u = 'https://honig-filz.at/', ok = document.getElementById('share-ok'), nb = document.getElementById('share-native');
+  if (navigator.share) {
+    nb.hidden = false;
+    nb.addEventListener('click', function () { navigator.share({ title: 'Honig ab Hof – Imkerei Josef Filz', text: 'Echter Honig ab Hof aus Bad Schönau – Imkerei Josef Filz. Online reservieren und abholen:', url: u }).catch(function () {}); });
+  }
+  document.getElementById('share-copy').addEventListener('click', function () {
+    function done() { ok.textContent = 'Link kopiert – du kannst ihn jetzt einfügen.'; setTimeout(function () { ok.textContent = ''; }, 4000); }
+    if (navigator.clipboard) navigator.clipboard.writeText(u).then(done, function () { ok.textContent = u; });
+    else ok.textContent = u;
+  });
+})();
+</script>
+<div id="site-footer"><footer class="footer"><div class="wrap footer-grid"><div><strong>Imkerei Josef Filz</strong><br>2853 Bad Schönau</div><div><strong>Schnellzugriff</strong><br><a href="./#reservieren">Honig online reservieren</a><br><a href="./#sorten">Unsere Honigsorten</a><br><a href="./#abholung">Abholzeiten &amp; Adresse</a><br><a href="./#faq">Häufige Fragen zum Honig</a><br><a href="status.html">Reservierung ansehen oder stornieren</a></div><div><strong>Rechtliches</strong><br><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a></div></div><div class="wrap footer-verband" style="margin-bottom:14px">Mitglied im <a href="https://www.kirchschlag-bw.gv.at/NOe_Imkerverband_-_Ortsgruppe_Kirchschlag" target="_blank" rel="noopener">NÖ Imkerverband – Ortsgruppe Kirchschlag ↗</a></div><div class="wrap small muted">© 2026 Imkerei Josef Filz</div></footer></div>
 
 <script src="supabase.js"></script>
 <script src="config.js"></script>
-<script src="common.js?v=14"></script>
+<script src="common.js?v=15"></script>
 <script src="shop.js?v=13"></script>
 </body>
 </html>
