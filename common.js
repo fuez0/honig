@@ -109,7 +109,7 @@
       (st.email ? 'E-Mail: <a href="mailto:' + esc(st.email) + '">' + esc(st.email) + '</a><br>' : '') + wa + '</div>' +
       '<div><strong>Schnellzugriff</strong><br><a href="./#reservieren">Honig online reservieren</a><br><a href="./#sorten">Unsere Honigsorten</a><br><a href="./#abholung">Abholzeiten &amp; Adresse</a><br><a href="./#faq">Häufige Fragen zum Honig</a><br><a href="status.html">Reservierung ansehen oder stornieren</a></div>' +
       '<div><strong>Rechtliches</strong><br><a href="impressum.html">Impressum</a><br><a href="datenschutz.html">Datenschutz</a><br><a href="admin.html">Verwaltung</a></div>' +
-      '</div><div class="wrap small muted">Alle Produkte nur zur Selbstabholung ab Hof – kein Versand. © ' + new Date().getFullYear() + ' ' + esc(st.hof_name) + '</div></footer>';
+      '</div><div class="wrap footer-verband" style="margin-bottom:14px">Imkerverband in der Region: <a href="https://www.kirchschlag-bw.gv.at/NOe_Imkerverband_-_Ortsgruppe_Kirchschlag" target="_blank" rel="noopener">NÖ Imkerverband – Ortsgruppe Kirchschlag ↗</a></div><div class="wrap small muted">Alle Produkte nur zur Selbstabholung ab Hof – kein Versand. © ' + new Date().getFullYear() + ' ' + esc(st.hof_name) + '</div></footer>';
   }
   function applyChrome(st, title) {
     // Startseite: SEO-Titel aus index.html behalten
