@@ -264,14 +264,22 @@
 
   async function newResView() {
     nav('res');
-    var p = await sb.from('products').select('*').eq('active', true).order('sort').order('id');
+    var p = await sb.from('products').select('*').order('sort').order('id');
+    var all = p.data || [], byId = {};
+    all.forEach(function (x) { byId[x.id] = x; });
+    var rows = [];
+    all.filter(function (x) { return !x.parent_id && x.active; }).forEach(function (x) {
+      if (x.has_sizes) all.filter(function (c) { return c.parent_id === x.id && c.active; })
+        .sort(function (a, b) { return (a.sort - b.sort) || (a.id - b.id); }).forEach(function (c) { rows.push(c); });
+      else rows.push(x);
+    });
     app.innerHTML = '<p><a href="#/">← Zurück</a></p><h1>Telefonische Reservierung</h1><form class="panel" id="nf"><div class="formgrid">' +
       '<label>Name *<input name="name" required></label><label>Telefon<input name="phone"></label><label>E-Mail<input type="email" name="email"></label>' +
       '<label>Wunschtermin<input type="date" name="wish_date"></label><label>Uhrzeit<input name="wish_time" placeholder="z. B. 16:00"></label>' +
       '<label class="full">Anmerkung<textarea name="note" rows="2"></textarea></label></div><h3 style="margin-top:20px">Produkte</h3><table class="atbl m-new">' +
-      p.data.map(function (x) {
+      rows.map(function (x) {
         return '<tr><td>' + esc(x.name) + ' <span class="muted">' + esc(x.unit) + '</span></td><td>' + euro(x.price_cents) + '</td><td class="small muted">' +
-          (x.stock == null ? 'unbegrenzt' : x.stock + ' lagernd') + '</td><td style="width:110px"><input type="number" min="0" max="99" value="0" data-pid="' + x.id + '"></td></tr>';
+          (x.stock == null ? 'unbegrenzt' : x.stock + ' lagernd') + '</td><td style="width:110px"><input type="number" min="0" max="99" value="0" data-pid="' + x.id + '" aria-label="Menge ' + esc(x.name + ' ' + x.unit) + '"></td></tr>';
       }).join('') + '</table><p><button class="btn">Reservierung speichern</button></p></form>';
     document.getElementById('nf').onsubmit = async function (e) {
       e.preventDefault();
@@ -317,19 +325,32 @@
   }
 
   // ---------- Produkte ----------
+  function sizesOf(all, p) {
+    return all.filter(function (c) { return c.parent_id === p.id; }).sort(function (a, b) { return (a.sort - b.sort) || (a.id - b.id); });
+  }
   async function productsView() {
     nav('prod');
     var p = await sb.from('products').select('*').order('sort').order('id');
     if (p.error) throw p.error;
-    app.innerHTML = '<div class="toolbar"><h1 style="margin:0">Produkte</h1><a class="btn btn-green" href="#/p/neu">+ Neues Produkt</a></div>' +
-      '<table class="atbl m-prod"><tr class="hd"><th></th><th>Produkt</th><th>Preis</th><th>Bestand</th><th class="hide-m">Sichtbar</th><th></th></tr>' +
-      p.data.map(function (x) {
-        return '<tr><td><img src="' + esc(H.imgSrc(x.image_url)) + '" alt=""></td><td><strong>' + esc(x.name) + '</strong><br><span class="small muted">' + esc(x.unit) + '</span></td>' +
-          '<td>' + euro(x.price_cents) + '</td><td style="width:110px"><input type="number" min="0" data-stock="' + x.id + '" value="' + (x.stock == null ? '' : x.stock) + '" placeholder="∞"></td>' +
-          '<td class="hide-m">' + (x.active ? '✅' : '🚫') + '</td><td class="r" style="white-space:nowrap"><a class="btn btn-small btn-grey" href="#/p/' + x.id + '">Bearbeiten</a> ' +
-          '<button class="btn btn-small btn-grey" data-toggle="' + x.id + '" data-active="' + (x.active ? 1 : 0) + '">' + (x.active ? 'Ausblenden' : 'Einblenden') + '</button></td></tr>';
-      }).join('') + '</table>' +
-      (p.data.length ? '<p><button class="btn btn-small" id="savestock">Bestand speichern</button> <span class="small muted">Leer = unbegrenzt. Reservierungen ziehen den Bestand automatisch ab, Stornos buchen ihn zurück.</span></p>' : '');
+    var all = p.data, tops = all.filter(function (x) { return !x.parent_id; });
+    app.innerHTML = '<div class="toolbar"><h1 style="margin:0">Produkte</h1><a class="btn btn-green" href="#/p/neu">+ Neuer Honig</a></div>' +
+      '<p class="small muted">Jeder Honig hat seine Größen (z. B. 250 g, 500 g, 1 kg) mit eigenem Preis und Bestand. Auf der Website ist das eine Karte mit Größenauswahl.</p>' +
+      (tops.length ? '' : '<div class="panel muted">Noch keine Produkte.</div>') +
+      tops.map(function (x) {
+        var sz = x.has_sizes ? sizesOf(all, x) : [x];
+        return '<div class="panel pcard' + (x.active ? '' : ' off') + '"><div class="pc-head"><img src="' + esc(H.imgSrc(x.image_url)) + '" alt="">' +
+          '<div class="pc-title"><strong>' + esc(x.name) + '</strong>' + (x.active ? '' : ' <span class="status status-storniert">ausgeblendet</span>') +
+          '<br><span class="small muted">' + (x.has_sizes ? sz.length + (sz.length === 1 ? ' Größe' : ' Größen') : esc(x.unit)) + '</span></div>' +
+          '<div class="pc-act"><a class="btn btn-small btn-grey" href="#/p/' + x.id + '">Bearbeiten</a> ' +
+          '<button class="btn btn-small btn-grey" data-toggle="' + x.id + '" data-active="' + (x.active ? 1 : 0) + '">' + (x.active ? 'Ausblenden' : 'Einblenden') + '</button></div></div>' +
+          '<table class="sztbl"><tr class="hd"><th>Größe</th><th>Preis</th><th>Bestand</th>' + (x.has_sizes ? '<th>Angeboten</th>' : '') + '</tr>' +
+          sz.map(function (c) {
+            return '<tr><td><strong>' + esc(c.unit || '–') + '</strong></td><td>' + euro(c.price_cents) + '</td>' +
+              '<td><input type="number" min="0" data-stock="' + c.id + '" value="' + (c.stock == null ? '' : c.stock) + '" placeholder="∞" aria-label="Bestand ' + esc(x.name + ' ' + c.unit) + '"></td>' +
+              (x.has_sizes ? '<td><label class="check"><input type="checkbox" data-offer="' + c.id + '"' + (c.active ? ' checked' : '') + '> <span>ja</span></label></td>' : '') + '</tr>';
+          }).join('') + (x.has_sizes && !sz.length ? '<tr><td colspan="4" class="muted small">Noch keine Größe – unter „Bearbeiten“ anlegen.</td></tr>' : '') + '</table></div>';
+      }).join('') +
+      (tops.length ? '<p><button class="btn" id="savestock">Bestand &amp; Angebot speichern</button> <span class="small muted">Bestand leer = unbegrenzt. Reservierungen ziehen den Bestand automatisch ab, Stornos buchen ihn zurück.</span></p>' : '');
     app.querySelectorAll('[data-toggle]').forEach(function (b) {
       b.onclick = async function () {
         var x = await sb.from('products').update({ active: b.dataset.active !== '1' }).eq('id', b.dataset.toggle);
@@ -338,13 +359,17 @@
     });
     var ss = document.getElementById('savestock');
     if (ss) ss.onclick = async function () {
+      ss.disabled = true;
       var inputs = app.querySelectorAll('[data-stock]');
       for (var i = 0; i < inputs.length; i++) {
-        var v = inputs[i].value.trim();
-        var x = await sb.from('products').update({ stock: v === '' ? null : Math.max(0, parseInt(v, 10)) }).eq('id', inputs[i].dataset.stock);
-        if (x.error) return err(x.error);
+        var v = inputs[i].value.trim(), row = { stock: v === '' ? null : Math.max(0, parseInt(v, 10)) };
+        var off = app.querySelector('[data-offer="' + inputs[i].dataset.stock + '"]');
+        if (off) row.active = off.checked;
+        var x = await sb.from('products').update(row).eq('id', inputs[i].dataset.stock);
+        if (x.error) { ss.disabled = false; return err(x.error); }
       }
-      flash('Bestand aktualisiert.');
+      ss.disabled = false;
+      flash('Bestand und Angebot gespeichert.');
     };
   }
 
@@ -376,19 +401,33 @@
 
   async function productView(id) {
     nav('prod');
-    var p = { name: '', description: '', unit: '500 g Glas', price_cents: 0, stock: null, max_per_order: null, image_url: '', active: true, sort: 100 };
+    var p = { name: '', description: '', unit: '', price_cents: 0, stock: null, max_per_order: null, image_url: '', active: true, sort: 100, has_sizes: true };
+    var sizes = [];
     if (id !== 'neu') {
-      var r = await sb.from('products').select('*').eq('id', id).maybeSingle();
-      if (!r.data) return go('#/produkte');
-      p = r.data;
+      var r = await sb.from('products').select('*').or('id.eq.' + (+id) + ',parent_id.eq.' + (+id)).order('sort').order('id');
+      var main = (r.data || []).filter(function (x) { return String(x.id) === String(+id); })[0];
+      if (!main || main.parent_id) return go('#/produkte');
+      p = main;
+      sizes = p.has_sizes ? r.data.filter(function (x) { return x.parent_id === p.id; }) : [p];
+    } else {
+      sizes = [{ unit: '250 g Glas' }, { unit: '500 g Glas' }, { unit: '1 kg Glas' }];
     }
-    app.innerHTML = '<p><a href="#/produkte">← Alle Produkte</a></p><h1>' + (p.id ? 'Produkt bearbeiten' : 'Neues Produkt') + '</h1>' +
+    var maxPO = (sizes.filter(function (x) { return x.max_per_order; })[0] || {}).max_per_order || p.max_per_order;
+    function sizeRow(c) {
+      return '<tr class="szrow" data-id="' + (c.id && c.id !== p.id ? c.id : (c.id === p.id && !p.has_sizes ? 'self' : '')) + '">' +
+        '<td><input name="sz_unit" value="' + esc(c.unit || '') + '" placeholder="z. B. 500 g Glas" aria-label="Größe"></td>' +
+        '<td><input name="sz_price" inputmode="decimal" value="' + (c.price_cents != null ? (c.price_cents / 100).toFixed(2).replace('.', ',') : '') + '" placeholder="leer = nicht angeboten" aria-label="Preis in Euro"></td>' +
+        '<td><input name="sz_stock" type="number" min="0" value="' + (c.stock == null ? '' : c.stock) + '" placeholder="∞" aria-label="Bestand"></td>' +
+        '<td><label class="check"><input type="checkbox" name="sz_active"' + (c.active === false ? '' : ' checked') + '> <span>ja</span></label></td>' +
+        '<td><button type="button" class="btn btn-small btn-grey sz-del" aria-label="Größe entfernen">✕</button></td></tr>';
+    }
+    app.innerHTML = '<p><a href="#/produkte">← Alle Produkte</a></p><h1>' + (p.id ? 'Honig bearbeiten' : 'Neuer Honig') + '</h1>' +
       '<form class="panel" id="pf"><div class="formgrid">' +
-      '<label>Name *<input name="name" required value="' + esc(p.name) + '" placeholder="z. B. Blütenhonig"></label>' +
-      '<label>Einheit / Größe<input name="unit" value="' + esc(p.unit) + '" placeholder="z. B. 500 g Glas"></label>' +
-      '<label>Preis (€) *<input name="price" required inputmode="decimal" value="' + (p.price_cents / 100).toFixed(2).replace('.', ',') + '"></label>' +
-      '<label>Bestand (leer = unbegrenzt)<input type="number" min="0" name="stock" value="' + (p.stock == null ? '' : p.stock) + '"></label>' +
-      '<label>Max. pro Reservierung (leer = egal)<input type="number" min="1" name="max_per_order" value="' + (p.max_per_order == null ? '' : p.max_per_order) + '"></label>' +
+      '<label class="full">Name *<input name="name" required value="' + esc(p.name) + '" placeholder="z. B. Waldhonig"></label>' +
+      '<div class="full"><strong>Größen &amp; Preise</strong><p class="small muted" style="margin:.2em 0 .6em">Jede Größe mit eigenem Preis und Bestand. Ohne Preis wird die Größe nicht gespeichert. „Angeboten“ ausschalten = vorübergehend nicht auf der Website.</p>' +
+      '<table class="sztbl szedit"><tr class="hd"><th>Größe</th><th>Preis (€)</th><th>Bestand (leer = unbegrenzt)</th><th>Angeboten</th><th></th></tr>' +
+      sizes.map(sizeRow).join('') + '</table><button type="button" class="btn btn-small btn-grey" id="szadd" style="margin-top:8px">+ Größe hinzufügen</button></div>' +
+      '<label>Max. pro Reservierung und Größe (leer = egal)<input type="number" min="1" name="max_per_order" value="' + (maxPO == null ? '' : maxPO) + '"></label>' +
       '<label>Reihenfolge (kleiner = weiter vorne)<input type="number" name="sort" value="' + p.sort + '"></label>' +
       '<label class="full">Beschreibung<textarea name="description" rows="4">' + esc(p.description) + '</textarea></label>' +
       '<div class="full"><strong>Foto</strong><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:6px">' +
@@ -397,32 +436,65 @@
       '<label>…oder Bild-Adresse (https://…)<input name="image_url" value="' + esc(p.image_url) + '"></label></div></div></div>' +
       '<label class="check full"><input type="checkbox" name="active" value="1"' + (p.active ? ' checked' : '') + '> Auf der Website anzeigen</label></div>' +
       '<p><button class="btn" id="psave">Speichern</button></p></form>' +
-      (p.id ? '<button class="btn btn-red btn-small" id="pdel">Produkt löschen</button>' : '');
-    var f = document.getElementById('pf');
+      (p.id ? '<button class="btn btn-red btn-small" id="pdel">Honig löschen</button>' : '');
+    var f = document.getElementById('pf'), tbl = f.querySelector('.szedit'), removed = [];
+    document.getElementById('szadd').onclick = function () {
+      tbl.insertAdjacentHTML('beforeend', sizeRow({ unit: '' }));
+      tbl.querySelector('tr:last-child input').focus();
+    };
+    tbl.addEventListener('click', function (e) {
+      var b = e.target.closest('.sz-del'); if (!b) return;
+      var tr = b.closest('tr');
+      if (tr.dataset.id && tr.dataset.id !== 'self') removed.push(+tr.dataset.id);
+      tr.remove();
+    });
     f.file.onchange = function () { if (f.file.files[0]) document.getElementById('prev').src = URL.createObjectURL(f.file.files[0]); };
     f.onsubmit = async function (e) {
       e.preventDefault();
-      var btn = document.getElementById('psave'); btn.disabled = true; btn.textContent = 'Speichert …';
+      var btn = document.getElementById('psave');
+      var rows = Array.prototype.map.call(tbl.querySelectorAll('.szrow'), function (tr) {
+        var unit = tr.querySelector('[name=sz_unit]').value.trim(), pr = tr.querySelector('[name=sz_price]').value.trim(), stv = tr.querySelector('[name=sz_stock]').value.trim();
+        return { id: tr.dataset.id, unit: unit, priceRaw: pr, price_cents: Math.max(0, H.parseEuro(pr)), stock: stv === '' ? null : Math.max(0, +stv), active: tr.querySelector('[name=sz_active]').checked };
+      }).filter(function (x) { return x.unit && x.priceRaw; });
+      if (!f.name.value.trim()) return flash('Bitte einen Namen angeben.', 'err');
+      if (!rows.length) return flash('Bitte mindestens eine Größe mit Preis eintragen.', 'err');
+      btn.disabled = true; btn.textContent = 'Speichert …';
       try {
         var img = f.image_url.value.trim();
         if (f.file.files[0]) { var newUrl = await uploadImage(f.file.files[0]); if (p.image_url && p.image_url !== newUrl) await removeStored(p.image_url); img = newUrl; }
-        var row = {
-          name: f.name.value.trim(), unit: f.unit.value.trim(), description: f.description.value.trim(),
-          price_cents: Math.max(0, H.parseEuro(f.price.value)), stock: f.stock.value === '' ? null : Math.max(0, +f.stock.value),
-          max_per_order: f.max_per_order.value === '' ? null : Math.max(1, +f.max_per_order.value),
-          sort: +f.sort.value || 0, image_url: img, active: f.active.checked
-        };
-        var x = p.id ? await sb.from('products').update(row).eq('id', p.id) : await sb.from('products').insert(row);
-        if (x.error) throw x.error;
-        go('#/produkte'); setTimeout(function () { flash('Produkt gespeichert.'); }, 300);
+        var name = f.name.value.trim(), maxp = f.max_per_order.value === '' ? null : Math.max(1, +f.max_per_order.value);
+        var base = { name: name, description: f.description.value.trim(), sort: +f.sort.value || 0, image_url: img, active: f.active.checked };
+        var x;
+        // Eine Größe bei einem bisher einfachen Produkt: einfach bleiben
+        if (rows.length === 1 && !p.has_sizes && p.id) {
+          x = await sb.from('products').update(Object.assign({}, base, { unit: rows[0].unit, price_cents: rows[0].price_cents, stock: rows[0].stock, max_per_order: maxp })).eq('id', p.id);
+          if (x.error) throw x.error;
+        } else {
+          var parentId = p.id, wasSimple = p.id && !p.has_sizes;
+          var head = Object.assign({}, base, { has_sizes: true, unit: '', price_cents: 0, stock: null, max_per_order: null });
+          if (parentId) { x = await sb.from('products').update(head).eq('id', parentId); if (x.error) throw x.error; }
+          else { x = await sb.from('products').insert(head).select('id').single(); if (x.error) throw x.error; parentId = x.data.id; }
+          for (var i = 0; i < rows.length; i++) {
+            var c = rows[i], row = { parent_id: parentId, name: name, unit: c.unit, price_cents: c.price_cents, stock: c.stock, active: c.active, sort: (i + 1) * 10, max_per_order: maxp, description: '', image_url: '' };
+            if (c.id && c.id !== 'self') x = await sb.from('products').update(row).eq('id', c.id);
+            else x = await sb.from('products').insert(row);
+            if (x.error) throw x.error;
+          }
+          if (wasSimple) { /* bisheriges Einzelprodukt ist jetzt der Honig; seine Daten stecken in der ersten Größe */ }
+        }
+        for (var j = 0; j < removed.length; j++) {
+          var d = await sb.from('products').delete().eq('id', removed[j]).select('id');
+          if (d.error || !d.data || !d.data.length) await sb.from('products').update({ active: false }).eq('id', removed[j]);
+        }
+        go('#/produkte'); setTimeout(function () { flash('„' + name + '“ gespeichert.'); }, 300);
       } catch (ex) { err(ex); btn.disabled = false; btn.textContent = 'Speichern'; }
     };
     var del = document.getElementById('pdel');
     if (del) del.onclick = async function () {
-      if (!confirm('Produkt „' + p.name + '“ wirklich löschen? Bestehende Reservierungen bleiben erhalten.')) return;
+      if (!confirm('„' + p.name + '“ mit allen Größen wirklich löschen? Bestehende Reservierungen bleiben erhalten.')) return;
       var x = await sb.from('products').delete().eq('id', p.id).select();
       if (x.error) return err(x.error);
-      if (!x.data || !x.data.length) return flash('Löschen ist in der Datenbank noch nicht freigeschaltet. Tipp: stattdessen „Ausblenden“.', 'warn');
+      if (!x.data || !x.data.length) return flash('Löschen hat nicht geklappt. Tipp: stattdessen „Ausblenden“.', 'warn');
       await removeStored(p.image_url);
       go('#/produkte'); setTimeout(function () { flash('„' + p.name + '“ gelöscht.'); }, 300);
     };

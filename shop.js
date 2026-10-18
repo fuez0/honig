@@ -30,26 +30,53 @@
   var open = st.reservierung_offen === '1';
   var jumpAfterRender = function () { H.scrollToHash(); window.addEventListener('load', H.scrollToHash, { once: true }); };
 
-  // ---------- Produkte ----------
+  // ---------- Produkte (ein Honig = eine Karte, Größen per Auswahl) ----------
   var grid = document.getElementById('grid');
-  if (!prods.length) grid.innerHTML = '<p class="empty">Derzeit ist kein Honig verfügbar – schau bald wieder vorbei!</p>';
-  else grid.innerHTML = prods.map(function (p) {
-    var stock = p.stock == null ? null : p.stock;
-    var sold = stock !== null && stock <= 0;
-    var full = p.name + (p.unit ? ' ' + p.unit : '');
+  function sizeLabel(u) { return String(u || '').replace(/\s*Glas$/i, '').trim() || u; }
+  var kids = {};
+  prods.forEach(function (p) { if (p.parent_id) (kids[p.parent_id] = kids[p.parent_id] || []).push(p); });
+  var groups = prods.filter(function (p) { return !p.parent_id; }).map(function (p) {
+    var vars = p.has_sizes ? (kids[p.id] || []) : [p];
+    vars = vars.slice().sort(function (a, b) { return (a.sort - b.sort) || (a.id - b.id); });
+    return { p: p, vars: vars, multi: !!p.has_sizes };
+  }).filter(function (g) { return g.vars.length > 0; });
+  var vinfo = {}, gsel = {};
+  function vMax(v) {
     var max = 99;
-    if (stock !== null) max = Math.min(max, Math.max(0, stock));
-    if (p.max_per_order) max = Math.min(max, p.max_per_order);
+    if (v.stock != null) max = Math.min(max, Math.max(0, v.stock));
+    if (v.max_per_order) max = Math.min(max, v.max_per_order);
+    return max;
+  }
+  if (!groups.length) grid.innerHTML = '<p class="empty">Derzeit ist kein Honig verfügbar – schau bald wieder vorbei!</p>';
+  else grid.innerHTML = groups.map(function (g) {
+    var p = g.p;
+    g.vars.forEach(function (v) { vinfo[v.id] = { v: v, g: p.id, max: vMax(v), label: sizeLabel(v.unit) }; });
+    var avail = g.vars.filter(function (v) { return vinfo[v.id].max > 0; });
+    var sold = avail.length === 0;
+    var first = (avail[0] || g.vars[0]);
+    gsel[p.id] = first.id;
+    var hidden = g.vars.map(function (v) {
+      return '<div class="vq" hidden data-id="' + v.id + '" data-g="' + p.id + '" data-price="' + v.price_cents + '" data-name="' + esc(v.name + (v.unit ? ' (' + v.unit + ')' : '')) + '">' +
+        '<input type="number" value="0" min="0" max="' + vinfo[v.id].max + '" tabindex="-1" aria-hidden="true"></div>';
+    }).join('');
+    var sizes = g.multi ? '<div class="sizes" role="radiogroup" aria-label="Größe ' + esc(p.name) + '">' + g.vars.map(function (v) {
+      var out = vinfo[v.id].max <= 0;
+      return '<button type="button" class="size' + (v.id === first.id ? ' sel' : '') + '" role="radio" aria-checked="' + (v.id === first.id) + '" data-v="' + v.id + '"' +
+        (v.id === first.id ? '' : ' tabindex="-1"') + (out ? ' disabled title="ausverkauft"' : '') + '>' +
+        '<span class="sz-l">' + esc(vinfo[v.id].label) + '</span><span class="sz-p">' + H.euro(v.price_cents) + '</span><span class="sz-n" hidden></span></button>';
+    }).join('') + '</div>' : '';
+    var full = p.name + (g.multi ? '' : (p.unit ? ' ' + p.unit : ''));
     var ctrl = sold ? '<span class="badge badge-out">Ausverkauft</span>' : (open ?
-      '<div class="qty" data-id="' + p.id + '" data-price="' + p.price_cents + '" data-name="' + esc(p.name + (p.unit ? ' (' + p.unit + ')' : '')) + '">' +
-      '<button type="button" class="qminus" aria-label="' + esc(full) + ' – Menge verringern">−</button>' +
-      '<input type="number" value="0" min="0" max="' + max + '" inputmode="numeric" aria-label="Menge ' + esc(full) + '">' +
-      '<button type="button" class="qplus" aria-label="' + esc(full) + ' – Menge erhöhen">+</button></div>' : '');
-    return '<article class="card' + (sold ? ' soldout' : '') + '">' +
-      '<div class="card-img"><img src="' + esc(H.imgSrc(p.image_url)) + '" alt="' + esc(full) + '" loading="lazy" onerror="this.onerror=null;this.src=\'glas.svg\'"></div>' +
-      '<div class="card-body"><h3>' + esc(p.name) + (p.unit ? ' <span class="unit">' + esc(p.unit) + '</span>' : '') + '</h3><p class="desc">' + H.nl(p.description) + '</p>' +
-      '<div class="card-foot"><span class="price">' + H.euro(p.price_cents) + '</span>' + ctrl + '</div>' +
-      (!sold && stock !== null && stock <= 5 ? '<p class="low">Nur noch ' + stock + ' verfügbar</p>' : '') +
+      '<div class="qty qsel" data-g="' + p.id + '">' +
+      '<button type="button" class="qminus" aria-label="' + esc(p.name) + ' – Menge verringern">−</button>' +
+      '<input type="number" value="0" min="0" max="' + vinfo[first.id].max + '" inputmode="numeric" aria-label="Menge ' + esc(full) + '">' +
+      '<button type="button" class="qplus" aria-label="' + esc(p.name) + ' – Menge erhöhen">+</button></div>' : '');
+    return '<article class="card' + (sold ? ' soldout' : '') + '" data-g="' + p.id + '">' +
+      '<div class="card-img"><img src="' + esc(H.imgSrc(p.image_url)) + '" alt="' + esc(p.name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'glas.svg\'"></div>' +
+      '<div class="card-body"><h3>' + esc(p.name) + (!g.multi && p.unit ? ' <span class="unit">' + esc(p.unit) + '</span>' : '') + '</h3><p class="desc">' + H.nl(p.description) + '</p>' +
+      sizes +
+      '<div class="card-foot"><span class="price" aria-live="polite">' + H.euro(first.price_cents) + '</span>' + ctrl + '</div>' +
+      '<p class="low" hidden></p>' + hidden +
       '</div></article>';
   }).join('');
 
@@ -167,7 +194,7 @@
   else document.getElementById('timewrap').style.display = 'none';
 
   // ---------- Warenkorb ----------
-  var qtys = Array.prototype.slice.call(document.querySelectorAll('.qty'));
+  var qtys = Array.prototype.slice.call(document.querySelectorAll('.vq'));
   function clamp(inp) {
     var max = parseInt(inp.max || '99', 10), v = parseInt(inp.value || '0', 10);
     if (isNaN(v) || v < 0) v = 0; if (v > max) v = max; inp.value = v;
@@ -179,7 +206,7 @@
     var q = qtyById(id); if (!q) return;
     q.querySelector('input').value = n; update();
   }
-  function update() {
+  function update(typing) {
     var total = 0, html = '', count = 0, allGlas = true;
     qtys.forEach(function (q) {
       var inp = q.querySelector('input'); clamp(inp);
@@ -201,7 +228,35 @@
     var unit = allGlas ? (count === 1 ? 'Glas' : 'Gläser') : 'Artikel';
     document.getElementById('cbinfo').textContent = count + ' ' + unit + ' · ' + H.euro(total);
     toggleBar();
+    refreshCards(typing);
     if (total > 0 && grid.classList.contains('invalid')) clearErr(grid);
+  }
+  function refreshCards(typing) {
+    Array.prototype.forEach.call(grid.querySelectorAll('.card[data-g]'), function (card) {
+      var g = card.dataset.g, vid = gsel[g], info = vinfo[vid]; if (!info) return;
+      var n = vVal(vid), box = card.querySelector('.qsel');
+      card.querySelector('.price').textContent = H.euro(info.v.price_cents);
+      if (box) {
+        var inp = box.querySelector('input');
+        if (!typing) inp.value = n;
+        inp.max = info.max;
+        inp.setAttribute('aria-label', 'Menge ' + info.v.name + ' ' + info.label);
+        box.classList.toggle('active', n > 0);
+        box.querySelector('.qplus').disabled = n >= info.max;
+        box.querySelector('.qminus').disabled = n <= 0;
+      }
+      Array.prototype.forEach.call(card.querySelectorAll('.size'), function (b) {
+        var c = vVal(+b.dataset.v), badge = b.querySelector('.sz-n');
+        badge.hidden = c <= 0; badge.textContent = c > 0 ? c + '×' : '';
+        b.classList.toggle('has', c > 0);
+        b.setAttribute('aria-label', vinfo[b.dataset.v].label + ', ' + H.euro(vinfo[b.dataset.v].v.price_cents) + (c > 0 ? ', ' + c + ' ausgewählt' : '') + (b.disabled ? ', ausverkauft' : ''));
+      });
+      var low = card.querySelector('.low'), st0 = info.v.stock;
+      if (low) {
+        var show = st0 != null && st0 > 0 && st0 <= 5;
+        low.hidden = !show; low.textContent = show ? 'Nur noch ' + st0 + (card.querySelector('.sizes') ? ' × ' + info.label : '') + ' verfügbar' : '';
+      }
+    });
   }
   function toggleBar() {
     var show = cartCount > 0 && !resVisible;
@@ -226,11 +281,33 @@
     var again = sumlist.querySelector('li[data-id="' + li.dataset.id + '"] button[data-act="' + act + '"]');
     if (again && !again.disabled) again.focus();
   });
-  qtys.forEach(function (q) {
-    var inp = q.querySelector('input');
-    q.querySelector('.qminus').addEventListener('click', function () { inp.value = Math.max(0, (parseInt(inp.value, 10) || 0) - 1); update(); });
-    q.querySelector('.qplus').addEventListener('click', function () { inp.value = (parseInt(inp.value, 10) || 0) + 1; update(); });
-    inp.addEventListener('input', update);
+  function vVal(id) { var q = qtyById(id); return q ? (parseInt(q.querySelector('input').value, 10) || 0) : 0; }
+  // Sichtbarer Mengenregler gilt für die gewählte Größe
+  Array.prototype.forEach.call(document.querySelectorAll('.qsel'), function (box) {
+    var g = box.dataset.g, inp = box.querySelector('input');
+    box.querySelector('.qminus').addEventListener('click', function () { setQty(gsel[g], Math.max(0, vVal(gsel[g]) - 1)); });
+    box.querySelector('.qplus').addEventListener('click', function () { setQty(gsel[g], vVal(gsel[g]) + 1); });
+    inp.addEventListener('input', function () { var q = qtyById(gsel[g]); if (q) { q.querySelector('input').value = inp.value; update(true); } });
+    inp.addEventListener('change', function () { update(); });
+  });
+  // Größe wählen
+  function selectSize(btn, focus) {
+    var card = btn.closest('.card'), g = card.dataset.g;
+    gsel[g] = +btn.dataset.v;
+    Array.prototype.forEach.call(card.querySelectorAll('.size'), function (b) {
+      var on = b === btn; b.classList.toggle('sel', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1;
+    });
+    if (focus) btn.focus();
+    update();
+  }
+  grid.addEventListener('click', function (e) { var b = e.target.closest('.size'); if (b && !b.disabled) selectSize(b); });
+  grid.addEventListener('keydown', function (e) {
+    var b = e.target.closest('.size'); if (!b) return;
+    if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].indexOf(e.key) === -1) return;
+    e.preventDefault();
+    var list = Array.prototype.filter.call(b.parentNode.querySelectorAll('.size'), function (x) { return !x.disabled; });
+    var i = list.indexOf(b) + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1);
+    selectSize(list[(i + list.length) % list.length], true);
   });
   update();
   jumpAfterRender();
@@ -272,7 +349,7 @@
     var g = document.getElementById('err-general'); if (g) g.remove();
   }
   function focusFirst(el) {
-    var target = el === grid ? (grid.querySelector('.qty input') || grid) : el === d ? dbtn : el;
+    var target = el === grid ? (grid.querySelector('.qsel input') || grid) : el === d ? dbtn : el;
     (el === grid ? grid : anchorOf(el)).scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { try { target.focus({ preventScroll: true }); } catch (e) {} }, 350);
   }
